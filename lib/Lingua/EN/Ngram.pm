@@ -4,6 +4,7 @@ package Lingua::EN::Ngram;
 
 # Eric Lease Morgan <eric_morgan@infomotions.com>
 # September 12, 2010 - first investigations; based on Lingua::EN::Bigram
+# November  25, 2010 - added non-Latin characters; Happy Thanksgiving!
 
 
 # include
@@ -11,7 +12,7 @@ use strict;
 use warnings;
 
 # define
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 
 sub new {
@@ -82,7 +83,7 @@ sub ngram {
 	
 	# initalize
 	my $text = $self->text;
-	$text =~ tr/a-zA-Z'()\-,.?!;:/\n/cs;
+	$text =~ tr/a-zA-Zà-ƶÀ-Ƶ'()\-,.?!;:/\n/cs;
 	$text =~ s/([,.?!:;()\-])/\n$1\n/g;
 	$text =~ s/\n+/\n/g;
 	my @words = split /\n/, lc( $text );
@@ -387,7 +388,7 @@ There are probably a number of ways the module can be improved:
 
 * the addition of alternative T-Score calculations would be nice
 
-* make sure the module works with character sets beyond ASCII
+* make sure the module works with character sets beyond ASCII (done, I think, as of version 0.02)
 
 =back
 
@@ -397,6 +398,8 @@ There are probably a number of ways the module can be improved:
 =over
 
 * September 12, 2010 (version 0.01) - initial release but an almost complete rewrite of Lingua::EN::Bigram
+
+* November 25, 2010 (version 0.02) - added non-Latin characters
 
 =back
 

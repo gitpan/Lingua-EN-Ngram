@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Lingua-EN-Ngram
-version:            0.01
+version:            0.02
 abstract:           Extract n-grams from texts and list them according to frequency and/or T-Score
 author:
     - Eric Lease Morgan

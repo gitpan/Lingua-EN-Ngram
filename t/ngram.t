@@ -9,6 +9,7 @@ use Test::More tests => 25;
 
 # Eric Lease Morgan <eric_morgan@infomotions.com>
 # September 12, 2010 - first cut; based on Lingua::EN::Bigram
+# November 25, 2010  - modified for non-Latin chacters; Happy Thanksgiving!
 
 
 # initialize
@@ -41,7 +42,7 @@ dies_ok { Lingua::EN::Ngram->new( foo => 'foo' ) } 'trapped invalid option';
 # set/get text
 my $text = do { local $/; <DATA> };
 $ngram->text( $text );
-like( $ngram->text, qr/^                                     350 BC/, 'set/get text' );
+like( $ngram->text, qr/^ANNALES GATLIOLIQUES TROISIEME ANNRE /, 'set/get text' );
 
 # ngram sanity checks
 dies_ok { $ngram->ngram } 'trapped not passing an argument to ngram';
@@ -49,28 +50,28 @@ dies_ok { $ngram->ngram( 5.5 ) } 'trapped need to pass an integer to ngram';
 
 # individual words
 my $ngrams = $ngram->ngram( 1 );
-is( scalar( keys %$ngrams ), 1354, 'ngrams(1) in a hash reference with 1354 keys' );
-is( $$ngrams{ 'bc' }, 1, '"bc" is a key that appears once' );
+is( scalar( keys %$ngrams ), 2738, 'ngrams(1) in a hash reference with 2738 keys' );
+is( $$ngrams{ 'éditeur' }, 1, '"éditeur" is a key that appears once' );
 
 # bigrams
 $ngrams = $ngram->ngram( 2 );
-is( scalar( keys %$ngrams ), 6106, 'ngrams(2) in a hash reference with 1354 keys' );
-is( $$ngrams{ 'bc metaphysics' }, 1, '"bc metaphysics" is as bigram appearing once' );
+is( scalar( keys %$ngrams ), 7039, 'ngrams(2) in a hash reference with 7039 keys' );
+is( $$ngrams{ 'éditeur des' }, 1, '"éditeur des" is as bigram appearing once' );
 
 # trigram
 $ngrams = $ngram->ngram( 3 );
-is( scalar( keys %$ngrams ), 9457, 'ngrams(3) in a hash reference with 1354 keys' );
-is( $$ngrams{ 'bc metaphysics by' }, 1, '"bc metaphysics by" is as trigram appearing once' );
+is( scalar( keys %$ngrams ), 8668, 'ngrams(3) in a hash reference with 8668 keys' );
+is( $$ngrams{ 'éditeur des annales' }, 1, '"éditeur des annales" is as trigram appearing once' );
 
 # n-gram
 $ngrams = $ngram->ngram( 8 );
-is( scalar( keys %$ngrams ), 10882, 'ngrams(8) in a hash reference with 1354 keys' );
-is( $$ngrams{ 'sensation memory is produced in some of them' }, 1, '"sensation memory is produced in some of them" is as n-gram appearing once' );
+is( scalar( keys %$ngrams ), 9063, 'ngrams(8) in a hash reference with 9063 keys' );
+is( $$ngrams{ 'ber sur nous tout le fardeau matériel de' }, 1, '"ber sur nous tout le fardeau matériel de" is as n-gram appearing once' );
 
 # tscore
 my $tscore = $ngram->tscore;
 is( ref( $tscore ), 'HASH', 'tscore is a hash' );
-like( $$tscore{ 'something else' }, qr/^1/, '"something else" has a tscore starting with 1' );
+like( $$tscore{ 'tous les' }, qr/^3/, '"tous les" has a tscore starting with 1' );
 
 # intersections error trapping
 my $walden = Lingua::EN::Ngram->new( file => './etc/walden.txt' );
@@ -91,917 +92,1000 @@ exit;
 
 # sample data
 __DATA__
-                                     350 BC
-
-                                  METAPHYSICS
-
-                                  by Aristotle
-
-                            translated by W. D. Ross
-
-                                Book I
-
-                                   1
-
-    ALL men by nature desire to know. An indication of this is the
-delight we take in our senses; for even apart from their usefulness
-they are loved for themselves; and above all others the sense of
-sight. For not only with a view to action, but even when we are not
-going to do anything, we prefer seeing (one might say) to everything
-else. The reason is that this, most of all the senses, makes us know
-and brings to light many differences between things.
-
-    By nature animals are born with the faculty of sensation, and from
-sensation memory is produced in some of them, though not in others.
-And therefore the former are more intelligent and apt at learning than
-those which cannot remember; those which are incapable of hearing
-sounds are intelligent though they cannot be taught, e.g. the bee, and
-any other race of animals that may be like it; and those which besides
-memory have this sense of hearing can be taught.
-
-    The animals other than man live by appearances and memories, and
-have but little of connected experience; but the human race lives also
-by art and reasonings. Now from memory experience is produced in
-men; for the several memories of the same thing produce finally the
-capacity for a single experience. And experience seems pretty much
-like science and art, but really science and art come to men through
-experience; for 'experience made art', as Polus says, 'but
-inexperience luck.' Now art arises when from many notions gained by
-experience one universal judgement about a class of objects is
-produced. For to have a judgement that when Callias was ill of this
-disease this did him good, and similarly in the case of Socrates and
-in many individual cases, is a matter of experience; but to judge that
-it has done good to all persons of a certain constitution, marked
-off in one class, when they were ill of this disease, e.g. to
-phlegmatic or bilious people when burning with fevers-this is a matter
-of art.
-
-    With a view to action experience seems in no respect inferior to
-art, and men of experience succeed even better than those who have
-theory without experience. (The reason is that experience is knowledge
-of individuals, art of universals, and actions and productions are all
-concerned with the individual; for the physician does not cure man,
-except in an incidental way, but Callias or Socrates or some other
-called by some such individual name, who happens to be a man. If,
-then, a man has the theory without the experience, and recognizes
-the universal but does not know the individual included in this, he
-will often fail to cure; for it is the individual that is to be
-cured.) But yet we think that knowledge and understanding belong to
-art rather than to experience, and we suppose artists to be wiser than
-men of experience (which implies that Wisdom depends in all cases
-rather on knowledge); and this because the former know the cause,
-but the latter do not. For men of experience know that the thing is
-so, but do not know why, while the others know the 'why' and the
-cause. Hence we think also that the masterworkers in each craft are
-more honourable and know in a truer sense and are wiser than the
-manual workers, because they know the causes of the things that are
-done (we think the manual workers are like certain lifeless things
-which act indeed, but act without knowing what they do, as fire
-burns,-but while the lifeless things perform each of their functions
-by a natural tendency, the labourers perform them through habit); thus
-we view them as being wiser not in virtue of being able to act, but of
-having the theory for themselves and knowing the causes. And in
-general it is a sign of the man who knows and of the man who does
-not know, that the former can teach, and therefore we think art more
-truly knowledge than experience is; for artists can teach, and men
-of mere experience cannot.
-
-    Again, we do not regard any of the senses as Wisdom; yet surely
-these give the most authoritative knowledge of particulars. But they
-do not tell us the 'why' of anything-e.g. why fire is hot; they only
-say that it is hot.
-
-    At first he who invented any art whatever that went beyond the
-common perceptions of man was naturally admired by men, not only
-because there was something useful in the inventions, but because he
-was thought wise and superior to the rest. But as more arts were
-invented, and some were directed to the necessities of life, others to
-recreation, the inventors of the latter were naturally always regarded
-as wiser than the inventors of the former, because their branches of
-knowledge did not aim at utility. Hence when all such inventions
-were already established, the sciences which do not aim at giving
-pleasure or at the necessities of life were discovered, and first in
-the places where men first began to have leisure. This is why the
-mathematical arts were founded in Egypt; for there the priestly
-caste was allowed to be at leisure.
-
-    We have said in the Ethics what the difference is between art
-and science and the other kindred faculties; but the point of our
-present discussion is this, that all men suppose what is called Wisdom
-to deal with the first causes and the principles of things; so that,
-as has been said before, the man of experience is thought to be
-wiser than the possessors of any sense-perception whatever, the artist
-wiser than the men of experience, the masterworker than the
-mechanic, and the theoretical kinds of knowledge to be more of the
-nature of Wisdom than the productive. Clearly then Wisdom is knowledge
-about certain principles and causes.
-
-                                   2
-
-    Since we are seeking this knowledge, we must inquire of what
-kind are the causes and the principles, the knowledge of which is
-Wisdom. If one were to take the notions we have about the wise man,
-this might perhaps make the answer more evident. We suppose first,
-then, that the wise man knows all things, as far as possible, although
-he has not knowledge of each of them in detail; secondly, that he
-who can learn things that are difficult, and not easy for man to know,
-is wise (sense-perception is common to all, and therefore easy and
-no mark of Wisdom); again, that he who is more exact and more
-capable of teaching the causes is wiser, in every branch of knowledge;
-and that of the sciences, also, that which is desirable on its own
-account and for the sake of knowing it is more of the nature of Wisdom
-than that which is desirable on account of its results, and the
-superior science is more of the nature of Wisdom than the ancillary;
-for the wise man must not be ordered but must order, and he must not
-obey another, but the less wise must obey him.
-
-    Such and so many are the notions, then, which we have about Wisdom
-and the wise. Now of these characteristics that of knowing all
-things must belong to him who has in the highest degree universal
-knowledge; for he knows in a sense all the instances that fall under
-the universal. And these things, the most universal, are on the
-whole the hardest for men to know; for they are farthest from the
-senses. And the most exact of the sciences are those which deal most
-with first principles; for those which involve fewer principles are
-more exact than those which involve additional principles, e.g.
-arithmetic than geometry. But the science which investigates causes is
-also instructive, in a higher degree, for the people who instruct us
-are those who tell the causes of each thing. And understanding and
-knowledge pursued for their own sake are found most in the knowledge
-of that which is most knowable (for he who chooses to know for the
-sake of knowing will choose most readily that which is most truly
-knowledge, and such is the knowledge of that which is most
-knowable); and the first principles and the causes are most
-knowable; for by reason of these, and from these, all other things
-come to be known, and not these by means of the things subordinate
-to them. And the science which knows to what end each thing must be
-done is the most authoritative of the sciences, and more authoritative
-than any ancillary science; and this end is the good of that thing,
-and in general the supreme good in the whole of nature. Judged by
-all the tests we have mentioned, then, the name in question falls to
-the same science; this must be a science that investigates the first
-principles and causes; for the good, i.e. the end, is one of the
-causes.
-
-    That it is not a science of production is clear even from the
-history of the earliest philosophers. For it is owing to their
-wonder that men both now begin and at first began to philosophize;
-they wondered originally at the obvious difficulties, then advanced
-little by little and stated difficulties about the greater matters,
-e.g. about the phenomena of the moon and those of the sun and of the
-stars, and about the genesis of the universe. And a man who is puzzled
-and wonders thinks himself ignorant (whence even the lover of myth
-is in a sense a lover of Wisdom, for the myth is composed of wonders);
-therefore since they philosophized order to escape from ignorance,
-evidently they were pursuing science in order to know, and not for any
-utilitarian end. And this is confirmed by the facts; for it was when
-almost all the necessities of life and the things that make for
-comfort and recreation had been secured, that such knowledge began
-to be sought. Evidently then we do not seek it for the sake of any
-other advantage; but as the man is free, we say, who exists for his
-own sake and not for another's, so we pursue this as the only free
-science, for it alone exists for its own sake.
-
-    Hence also the possession of it might be justly regarded as beyond
-human power; for in many ways human nature is in bondage, so that
-according to Simonides 'God alone can have this privilege', and it
-is unfitting that man should not be content to seek the knowledge that
-is suited to him. If, then, there is something in what the poets
-say, and jealousy is natural to the divine power, it would probably
-occur in this case above all, and all who excelled in this knowledge
-would be unfortunate. But the divine power cannot be jealous (nay,
-according to the proverb, 'bards tell a lie'), nor should any other
-science be thought more honourable than one of this sort. For the most
-divine science is also most honourable; and this science alone must
-be, in two ways, most divine. For the science which it would be most
-meet for God to have is a divine science, and so is any science that
-deals with divine objects; and this science alone has both these
-qualities; for (1) God is thought to be among the causes of all things
-and to be a first principle, and (2) such a science either God alone
-can have, or God above all others. All the sciences, indeed, are
-more necessary than this, but none is better.
-
-    Yet the acquisition of it must in a sense end in something which
-is the opposite of our original inquiries. For all men begin, as we
-said, by wondering that things are as they are, as they do about
-self-moving marionettes, or about the solstices or the
-incommensurability of the diagonal of a square with the side; for it
-seems wonderful to all who have not yet seen the reason, that there is
-a thing which cannot be measured even by the smallest unit. But we
-must end in the contrary and, according to the proverb, the better
-state, as is the case in these instances too when men learn the cause;
-for there is nothing which would surprise a geometer so much as if the
-diagonal turned out to be commensurable.
-
-    We have stated, then, what is the nature of the science we are
-searching for, and what is the mark which our search and our whole
-investigation must reach.
-
-                                   3
-
-    Evidently we have to acquire knowledge of the original causes (for
-we say we know each thing only when we think we recognize its first
-cause), and causes are spoken of in four senses. In one of these we
-mean the substance, i.e. the essence (for the 'why' is reducible
-finally to the definition, and the ultimate 'why' is a cause and
-principle); in another the matter or substratum, in a third the source
-of the change, and in a fourth the cause opposed to this, the
-purpose and the good (for this is the end of all generation and
-change). We have studied these causes sufficiently in our work on
-nature, but yet let us call to our aid those who have attacked the
-investigation of being and philosophized about reality before us.
-For obviously they too speak of certain principles and causes; to go
-over their views, then, will be of profit to the present inquiry,
-for we shall either find another kind of cause, or be more convinced
-of the correctness of those which we now maintain.
-
-    Of the first philosophers, then, most thought the principles which
-were of the nature of matter were the only principles of all things.
-That of which all things that are consist, the first from which they
-come to be, the last into which they are resolved (the substance
-remaining, but changing in its modifications), this they say is the
-element and this the principle of things, and therefore they think
-nothing is either generated or destroyed, since this sort of entity is
-always conserved, as we say Socrates neither comes to be absolutely
-when he comes to be beautiful or musical, nor ceases to be when
-loses these characteristics, because the substratum, Socrates
-himself remains. just so they say nothing else comes to be or ceases
-to be; for there must be some entity-either one or more than
-one-from which all other things come to be, it being conserved.
-
-    Yet they do not all agree as to the number and the nature of these
-principles. Thales, the founder of this type of philosophy, says the
-principle is water (for which reason he declared that the earth
-rests on water), getting the notion perhaps from seeing that the
-nutriment of all things is moist, and that heat itself is generated
-from the moist and kept alive by it (and that from which they come
-to be is a principle of all things). He got his notion from this fact,
-and from the fact that the seeds of all things have a moist nature,
-and that water is the origin of the nature of moist things.
-
-    Some think that even the ancients who lived long before the
-present generation, and first framed accounts of the gods, had a
-similar view of nature; for they made Ocean and Tethys the parents
-of creation, and described the oath of the gods as being by water,
-to which they give the name of Styx; for what is oldest is most
-honourable, and the most honourable thing is that by which one swears.
-It may perhaps be uncertain whether this opinion about nature is
-primitive and ancient, but Thales at any rate is said to have declared
-himself thus about the first cause. Hippo no one would think fit to
-include among these thinkers, because of the paltriness of his
-thought.
-
-    Anaximenes and Diogenes make air prior to water, and the most
-primary of the simple bodies, while Hippasus of Metapontium and
-Heraclitus of Ephesus say this of fire, and Empedocles says it of
-the four elements (adding a fourth-earth-to those which have been
-named); for these, he says, always remain and do not come to be,
-except that they come to be more or fewer, being aggregated into one
-and segregated out of one.
-
-    Anaxagoras of Clazomenae, who, though older than Empedocles, was
-later in his philosophical activity, says the principles are
-infinite in number; for he says almost all the things that are made of
-parts like themselves, in the manner of water or fire, are generated
-and destroyed in this way, only by aggregation and segregation, and
-are not in any other sense generated or destroyed, but remain
-eternally.
-
-    From these facts one might think that the only cause is the
-so-called material cause; but as men thus advanced, the very facts
-opened the way for them and joined in forcing them to investigate
-the subject. However true it may be that all generation and
-destruction proceed from some one or (for that matter) from more
-elements, why does this happen and what is the cause? For at least the
-substratum itself does not make itself change; e.g. neither the wood
-nor the bronze causes the change of either of them, nor does the
-wood manufacture a bed and the bronze a statue, but something else
-is the cause of the change. And to seek this is to seek the second
-cause, as we should say,-that from which comes the beginning of the
-movement. Now those who at the very beginning set themselves to this
-kind of inquiry, and said the substratum was one, were not at all
-dissatisfied with themselves; but some at least of those who
-maintain it to be one-as though defeated by this search for the second
-cause-say the one and nature as a whole is unchangeable not only in
-respect of generation and destruction (for this is a primitive belief,
-and all agreed in it), but also of all other change; and this view
-is peculiar to them. Of those who said the universe was one, then none
-succeeded in discovering a cause of this sort, except perhaps
-Parmenides, and he only inasmuch as he supposes that there is not only
-one but also in some sense two causes. But for those who make more
-elements it is more possible to state the second cause, e.g. for those
-who make hot and cold, or fire and earth, the elements; for they treat
-fire as having a nature which fits it to move things, and water and
-earth and such things they treat in the contrary way.
-
-    When these men and the principles of this kind had had their
-day, as the latter were found inadequate to generate the nature of
-things men were again forced by the truth itself, as we said, to
-inquire into the next kind of cause. For it is not likely either
-that fire or earth or any such element should be the reason why things
-manifest goodness and, beauty both in their being and in their
-coming to be, or that those thinkers should have supposed it was;
-nor again could it be right to entrust so great a matter to
-spontaneity and chance. When one man said, then, that reason was
-present-as in animals, so throughout nature-as the cause of order
-and of all arrangement, he seemed like a sober man in contrast with
-the random talk of his predecessors. We know that Anaxagoras certainly
-adopted these views, but Hermotimus of Clazomenae is credited with
-expressing them earlier. Those who thought thus stated that there is a
-principle of things which is at the same time the cause of beauty, and
-that sort of cause from which things acquire movement.
-
-                                   4
-
-    One might suspect that Hesiod was the first to look for such a
-thing-or some one else who put love or desire among existing things as
-a principle, as Parmenides, too, does; for he, in constructing the
-genesis of the universe, says:-
-
-          Love first of all the Gods she planned.
-
-    And Hesiod says:-
-
-          First of all things was chaos made, and then
-
-          Broad-breasted earth...
-
-          And love, 'mid all the gods pre-eminent,
-
-  which implies that among existing things there must be from the
-first a cause which will move things and bring them together. How
-these thinkers should be arranged with regard to priority of discovery
-let us be allowed to decide later; but since the contraries of the
-various forms of good were also perceived to be present in
-nature-not only order and the beautiful, but also disorder and the
-ugly, and bad things in greater number than good, and ignoble things
-than beautiful-therefore another thinker introduced friendship and
-strife, each of the two the cause of one of these two sets of
-qualities. For if we were to follow out the view of Empedocles, and
-interpret it according to its meaning and not to its lisping
-expression, we should find that friendship is the cause of good
-things, and strife of bad. Therefore, if we said that Empedocles in
-a sense both mentions, and is the first to mention, the bad and the
-good as principles, we should perhaps be right, since the cause of all
-goods is the good itself.
-
-    These thinkers, as we say, evidently grasped, and to this
-extent, two of the causes which we distinguished in our work on
-nature-the matter and the source of the movement-vaguely, however, and
-with no clearness, but as untrained men behave in fights; for they
-go round their opponents and often strike fine blows, but they do
-not fight on scientific principles, and so too these thinkers do not
-seem to know what they say; for it is evident that, as a rule, they
-make no use of their causes except to a small extent. For Anaxagoras
-uses reason as a deus ex machina for the making of the world, and when
-he is at a loss to tell from what cause something necessarily is, then
-he drags reason in, but in all other cases ascribes events to anything
-rather than to reason. And Empedocles, though he uses the causes to
-a greater extent than this, neither does so sufficiently nor attains
-consistency in their use. At least, in many cases he makes love
-segregate things, and strife aggregate them. For whenever the universe
-is dissolved into its elements by strife, fire is aggregated into one,
-and so is each of the other elements; but whenever again under the
-influence of love they come together into one, the parts must again be
-segregated out of each element.
-
-    Empedocles, then, in contrast with his precessors, was the first
-to introduce the dividing of this cause, not positing one source of
-movement, but different and contrary sources. Again, he was the
-first to speak of four material elements; yet he does not use four,
-but treats them as two only; he treats fire by itself, and its
-opposite-earth, air, and water-as one kind of thing. We may learn this
-by study of his verses.
-
-    This philosopher then, as we say, has spoken of the principles
-in this way, and made them of this number. Leucippus and his associate
-Democritus say that the full and the empty are the elements, calling
-the one being and the other non-being-the full and solid being
-being, the empty non-being (whence they say being no more is than
-non-being, because the solid no more is than the empty); and they make
-these the material causes of things. And as those who make the
-underlying substance one generate all other things by its
-modifications, supposing the rare and the dense to be the sources of
-the modifications, in the same way these philosophers say the
-differences in the elements are the causes of all other qualities.
-These differences, they say, are three-shape and order and position.
-For they say the real is differentiated only by 'rhythm and
-'inter-contact' and 'turning'; and of these rhythm is shape,
-inter-contact is order, and turning is position; for A differs from
-N in shape, AN from NA in order, M from W in position. The question of
-movement-whence or how it is to belong to things-these thinkers,
-like the others, lazily neglected.
-
-    Regarding the two causes, then, as we say, the inquiry seems to
-have been pushed thus far by the early philosophers.
-
-                                   5
-
-    Contemporaneously with these philosophers and before them, the
-so-called Pythagoreans, who were the first to take up mathematics, not
-only advanced this study, but also having been brought up in it they
-thought its principles were the principles of all things. Since of
-these principles numbers are by nature the first, and in numbers
-they seemed to see many resemblances to the things that exist and come
-into being-more than in fire and earth and water (such and such a
-modification of numbers being justice, another being soul and
-reason, another being opportunity-and similarly almost all other
-things being numerically expressible); since, again, they saw that the
-modifications and the ratios of the musical scales were expressible in
-numbers;-since, then, all other things seemed in their whole nature to
-be modelled on numbers, and numbers seemed to be the first things in
-the whole of nature, they supposed the elements of numbers to be the
-elements of all things, and the whole heaven to be a musical scale and
-a number. And all the properties of numbers and scales which they
-could show to agree with the attributes and parts and the whole
-arrangement of the heavens, they collected and fitted into their
-scheme; and if there was a gap anywhere, they readily made additions
-so as to make their whole theory coherent. E.g. as the number 10 is
-thought to be perfect and to comprise the whole nature of numbers,
-they say that the bodies which move through the heavens are ten, but
-as the visible bodies are only nine, to meet this they invent a
-tenth--the 'counter-earth'. We have discussed these matters more
-exactly elsewhere.
-
-    But the object of our review is that we may learn from these
-philosophers also what they suppose to be the principles and how these
-fall under the causes we have named. Evidently, then, these thinkers
-also consider that number is the principle both as matter for things
-and as forming both their modifications and their permanent states,
-and hold that the elements of number are the even and the odd, and
-that of these the latter is limited, and the former unlimited; and
-that the One proceeds from both of these (for it is both even and
-odd), and number from the One; and that the whole heaven, as has
-been said, is numbers.
-
-    Other members of this same school say there are ten principles,
-which they arrange in two columns of cognates-limit and unlimited, odd
-and even, one and plurality, right and left, male and female,
-resting and moving, straight and curved, light and darkness, good
-and bad, square and oblong. In this way Alcmaeon of Croton seems
-also to have conceived the matter, and either he got this view from
-them or they got it from him; for he expressed himself similarly to
-them. For he says most human affairs go in pairs, meaning not definite
-contrarieties such as the Pythagoreans speak of, but any chance
-contrarieties, e.g. white and black, sweet and bitter, good and bad,
-great and small. He threw out indefinite suggestions about the other
-contrarieties, but the Pythagoreans declared both how many and which
-their contraricties are.
-
-    From both these schools, then, we can learn this much, that the
-contraries are the principles of things; and how many these principles
-are and which they are, we can learn from one of the two schools.
-But how these principles can be brought together under the causes we
-have named has not been clearly and articulately stated by them;
-they seem, however, to range the elements under the head of matter;
-for out of these as immanent parts they say substance is composed
-and moulded.
-
-    From these facts we may sufficiently perceive the meaning of the
-ancients who said the elements of nature were more than one; but there
-are some who spoke of the universe as if it were one entity, though
-they were not all alike either in the excellence of their statement or
-in its conformity to the facts of nature. The discussion of them is in
-no way appropriate to our present investigation of causes, for. they
-do not, like some of the natural philosophers, assume being to be
-one and yet generate it out of the one as out of matter, but they
-speak in another way; those others add change, since they generate the
-universe, but these thinkers say the universe is unchangeable. Yet
-this much is germane to the present inquiry: Parmenides seems to
-fasten on that which is one in definition, Melissus on that which is
-one in matter, for which reason the former says that it is limited,
-the latter that it is unlimited; while Xenophanes, the first of
-these partisans of the One (for Parmenides is said to have been his
-pupil), gave no clear statement, nor does he seem to have grasped
-the nature of either of these causes, but with reference to the
-whole material universe he says the One is God. Now these thinkers, as
-we said, must be neglected for the purposes of the present inquiry-two
-of them entirely, as being a little too naive, viz. Xenophanes and
-Melissus; but Parmenides seems in places to speak with more insight.
-For, claiming that, besides the existent, nothing non-existent exists,
-he thinks that of necessity one thing exists, viz. the existent and
-nothing else (on this we have spoken more clearly in our work on
-nature), but being forced to follow the observed facts, and
-supposing the existence of that which is one in definition, but more
-than one according to our sensations, he now posits two causes and two
-principles, calling them hot and cold, i.e. fire and earth; and of
-these he ranges the hot with the existent, and the other with the
-non-existent.
-
-    From what has been said, then, and from the wise men who have
-now sat in council with us, we have got thus much-on the one hand from
-the earliest philosophers, who regard the first principle as corporeal
-(for water and fire and such things are bodies), and of whom some
-suppose that there is one corporeal principle, others that there are
-more than one, but both put these under the head of matter; and on the
-other hand from some who posit both this cause and besides this the
-source of movement, which we have got from some as single and from
-others as twofold.
-
-    Down to the Italian school, then, and apart from it,
-philosophers have treated these subjects rather obscurely, except
-that, as we said, they have in fact used two kinds of cause, and one
-of these-the source of movement-some treat as one and others as two.
-But the Pythagoreans have said in the same way that there are two
-principles, but added this much, which is peculiar to them, that
-they thought that finitude and infinity were not attributes of certain
-other things, e.g. of fire or earth or anything else of this kind, but
-that infinity itself and unity itself were the substance of the things
-of which they are predicated. This is why number was the substance
-of all things. On this subject, then, they expressed themselves
-thus; and regarding the question of essence they began to make
-statements and definitions, but treated the matter too simply. For
-they both defined superficially and thought that the first subject
-of which a given definition was predicable was the substance of the
-thing defined, as if one supposed that 'double' and '2' were the same,
-because 2 is the first thing of which 'double' is predicable. But
-surely to be double and to be 2 are not the same; if they are, one
-thing will be many-a consequence which they actually drew. From the
-earlier philosophers, then, and from their successors we can learn
-thus much.
-
-                                   6
-
-    After the systems we have named came the philosophy of Plato,
-which in most respects followed these thinkers, but had
-pecullarities that distinguished it from the philosophy of the
-Italians. For, having in his youth first become familiar with Cratylus
-and with the Heraclitean doctrines (that all sensible things are
-ever in a state of flux and there is no knowledge about them), these
-views he held even in later years. Socrates, however, was busying
-himself about ethical matters and neglecting the world of nature as
-a whole but seeking the universal in these ethical matters, and
-fixed thought for the first time on definitions; Plato accepted his
-teaching, but held that the problem applied not to sensible things but
-to entities of another kind-for this reason, that the common
-definition could not be a definition of any sensible thing, as they
-were always changing. Things of this other sort, then, he called
-Ideas, and sensible things, he said, were all named after these, and
-in virtue of a relation to these; for the many existed by
-participation in the Ideas that have the same name as they. Only the
-name 'participation' was new; for the Pythagoreans say that things
-exist by 'imitation' of numbers, and Plato says they exist by
-participation, changing the name. But what the participation or the
-imitation of the Forms could be they left an open question.
-
-    Further, besides sensible things and Forms he says there are the
-objects of mathematics, which occupy an intermediate position,
-differing from sensible things in being eternal and unchangeable, from
-Forms in that there are many alike, while the Form itself is in each
-case unique.
-
-    Since the Forms were the causes of all other things, he thought
-their elements were the elements of all things. As matter, the great
-and the small were principles; as essential reality, the One; for from
-the great and the small, by participation in the One, come the
-Numbers.
-
-    But he agreed with the Pythagoreans in saying that the One is
-substance and not a predicate of something else; and in saying that
-the Numbers are the causes of the reality of other things he agreed
-with them; but positing a dyad and constructing the infinite out of
-great and small, instead of treating the infinite as one, is
-peculiar to him; and so is his view that the Numbers exist apart
-from sensible things, while they say that the things themselves are
-Numbers, and do not place the objects of mathematics between Forms and
-sensible things. His divergence from the Pythagoreans in making the
-One and the Numbers separate from things, and his introduction of
-the Forms, were due to his inquiries in the region of definitions (for
-the earlier thinkers had no tincture of dialectic), and his making the
-other entity besides the One a dyad was due to the belief that the
-numbers, except those which were prime, could be neatly produced out
-of the dyad as out of some plastic material. Yet what happens is the
-contrary; the theory is not a reasonable one. For they make many
-things out of the matter, and the form generates only once, but what
-we observe is that one table is made from one matter, while the man
-who applies the form, though he is one, makes many tables. And the
-relation of the male to the female is similar; for the latter is
-impregnated by one copulation, but the male impregnates many
-females; yet these are analogues of those first principles.
-
-    Plato, then, declared himself thus on the points in question; it
-is evident from what has been said that he has used only two causes,
-that of the essence and the material cause (for the Forms are the
-causes of the essence of all other things, and the One is the cause of
-the essence of the Forms); and it is evident what the underlying
-matter is, of which the Forms are predicated in the case of sensible
-things, and the One in the case of Forms, viz. that this is a dyad,
-the great and the small. Further, he has assigned the cause of good
-and that of evil to the elements, one to each of the two, as we say
-some of his predecessors sought to do, e.g. Empedocles and Anaxagoras.
-
-                                   7
-
-    Our review of those who have spoken about first principles and
-reality and of the way in which they have spoken, has been concise and
-summary; but yet we have learnt this much from them, that of those who
-speak about 'principle' and 'cause' no one has mentioned any principle
-except those which have been distinguished in our work on nature,
-but all evidently have some inkling of them, though only vaguely.
-For some speak of the first principle as matter, whether they
-suppose one or more first principles, and whether they suppose this to
-be a body or to be incorporeal; e.g. Plato spoke of the great and
-the small, the Italians of the infinite, Empedocles of fire, earth,
-water, and air, Anaxagoras of the infinity of things composed of
-similar parts. These, then, have all had a notion of this kind of
-cause, and so have all who speak of air or fire or water, or something
-denser than fire and rarer than air; for some have said the prime
-element is of this kind.
-
-    These thinkers grasped this cause only; but certain others have
-mentioned the source of movement, e.g. those who make friendship and
-strife, or reason, or love, a principle.
-
-    The essence, i.e. the substantial reality, no one has expressed
-distinctly. It is hinted at chiefly by those who believe in the Forms;
-for they do not suppose either that the Forms are the matter of
-sensible things, and the One the matter of the Forms, or that they are
-the source of movement (for they say these are causes rather of
-immobility and of being at rest), but they furnish the Forms as the
-essence of every other thing, and the One as the essence of the Forms.
-
-    That for whose sake actions and changes and movements take
-place, they assert to be a cause in a way, but not in this way, i.e.
-not in the way in which it is its nature to be a cause. For those
-who speak of reason or friendship class these causes as goods; they do
-not speak, however, as if anything that exists either existed or
-came into being for the sake of these, but as if movements started
-from these. In the same way those who say the One or the existent is
-the good, say that it is the cause of substance, but not that
-substance either is or comes to be for the sake of this. Therefore
-it turns out that in a sense they both say and do not say the good
-is a cause; for they do not call it a cause qua good but only
-incidentally.
-
-    All these thinkers then, as they cannot pitch on another cause,
-seem to testify that we have determined rightly both how many and of
-what sort the causes are. Besides this it is plain that when the
-causes are being looked for, either all four must be sought thus or
-they must be sought in one of these four ways. Let us next discuss the
-possible difficulties with regard to the way in which each of these
-thinkers has spoken, and with regard to his situation relatively to
-the first principles.
-
-                                   8
-
-    Those, then, who say the universe is one and posit one kind of
-thing as matter, and as corporeal matter which has spatial
-magnitude, evidently go astray in many ways. For they posit the
-elements of bodies only, not of incorporeal things, though there are
-also incorporeal things. And in trying to state the causes of
-generation and destruction, and in giving a physical account of all
-things, they do away with the cause of movement. Further, they err
-in not positing the substance, i.e. the essence, as the cause of
-anything, and besides this in lightly calling any of the simple bodies
-except earth the first principle, without inquiring how they are
-produced out of one anothers-I mean fire, water, earth, and air. For
-some things are produced out of each other by combination, others by
-separation, and this makes the greatest difference to their priority
-and posteriority. For (1) in a way the property of being most
-elementary of all would seem to belong to the first thing from which
-they are produced by combination, and this property would belong to
-the most fine-grained and subtle of bodies. For this reason those
-who make fire the principle would be most in agreement with this
-argument. But each of the other thinkers agrees that the element of
-corporeal things is of this sort. At least none of those who named one
-element claimed that earth was the element, evidently because of the
-coarseness of its grain. (Of the other three elements each has found
-some judge on its side; for some maintain that fire, others that
-water, others that air is the element. Yet why, after all, do they not
-name earth also, as most men do? For people say all things are earth
-Hesiod says earth was produced first of corporeal things; so primitive
-and popular has the opinion been.) According to this argument, then,
-no one would be right who either says the first principle is any of
-the elements other than fire, or supposes it to be denser than air but
-rarer than water. But (2) if that which is later in generation is
-prior in nature, and that which is concocted and compounded is later
-in generation, the contrary of what we have been saying must be
-true,-water must be prior to air, and earth to water.
-
-    So much, then, for those who posit one cause such as we mentioned;
-but the same is true if one supposes more of these, as Empedocles says
-matter of things is four bodies. For he too is confronted by
-consequences some of which are the same as have been mentioned,
-while others are peculiar to him. For we see these bodies produced
-from one another, which implies that the same body does not always
-remain fire or earth (we have spoken about this in our works on
-nature); and regarding the cause of movement and the question
-whether we must posit one or two, he must be thought to have spoken
-neither correctly nor altogether plausibly. And in general, change
-of quality is necessarily done away with for those who speak thus, for
-on their view cold will not come from hot nor hot from cold. For if it
-did there would be something that accepted the contraries
-themselves, and there would be some one entity that became fire and
-water, which Empedocles denies.
-
-    As regards Anaxagoras, if one were to suppose that he said there
-were two elements, the supposition would accord thoroughly with an
-argument which Anaxagoras himself did not state articulately, but
-which he must have accepted if any one had led him on to it. True,
-to say that in the beginning all things were mixed is absurd both on
-other grounds and because it follows that they must have existed
-before in an unmixed form, and because nature does not allow any
-chance thing to be mixed with any chance thing, and also because on
-this view modifications and accidents could be separated from
-substances (for the same things which are mixed can be separated); yet
-if one were to follow him up, piecing together what he means, he would
-perhaps be seen to be somewhat modern in his views. For when nothing
-was separated out, evidently nothing could be truly asserted of the
-substance that then existed. I mean, e.g. that it was neither white
-nor black, nor grey nor any other colour, but of necessity colourless;
-for if it had been coloured, it would have had one of these colours.
-And similarly, by this same argument, it was flavourless, nor had it
-any similar attribute; for it could not be either of any quality or of
-any size, nor could it be any definite kind of thing. For if it
-were, one of the particular forms would have belonged to it, and
-this is impossible, since all were mixed together; for the
-particular form would necessarily have been already separated out, but
-he all were mixed except reason, and this alone was unmixed and
-pure. From this it follows, then, that he must say the principles
-are the One (for this is simple and unmixed) and the Other, which is
-of such a nature as we suppose the indefinite to be before it is
-defined and partakes of some form. Therefore, while expressing himself
-neither rightly nor clearly, he means something like what the later
-thinkers say and what is now more clearly seen to be the case.
-
-    But these thinkers are, after all, at home only in arguments about
-generation and destruction and movement; for it is practically only of
-this sort of substance that they seek the principles and the causes.
-But those who extend their vision to all things that exist, and of
-existing things suppose some to be perceptible and others not
-perceptible, evidently study both classes, which is all the more
-reason why one should devote some time to seeing what is good in their
-views and what bad from the standpoint of the inquiry we have now
-before us.
-
-    The 'Pythagoreans' treat of principles and elements stranger
-than those of the physical philosophers (the reason is that they got
-the principles from non-sensible things, for the objects of
-mathematics, except those of astronomy, are of the class of things
-without movement); yet their discussions and investigations are all
-about nature; for they generate the heavens, and with regard to
-their parts and attributes and functions they observe the phenomena,
-and use up the principles and the causes in explaining these, which
-implies that they agree with the others, the physical philosophers,
-that the real is just all that which is perceptible and contained by
-the so-called 'heavens'. But the causes and the principles which
-they mention are, as we said, sufficient to act as steps even up to
-the higher realms of reality, and are more suited to these than to
-theories about nature. They do not tell us at all, however, how
-there can be movement if limit and unlimited and odd and even are
-the only things assumed, or how without movement and change there
-can be generation and destruction, or the bodies that move through the
-heavens can do what they do.
-
-    Further, if one either granted them that spatial magnitude
-consists of these elements, or this were proved, still how would
-some bodies be light and others have weight? To judge from what they
-assume and maintain they are speaking no more of mathematical bodies
-than of perceptible; hence they have said nothing whatever about
-fire or earth or the other bodies of this sort, I suppose because they
-have nothing to say which applies peculiarly to perceptible things.
-
-    Further, how are we to combine the beliefs that the attributes
-of number, and number itself, are causes of what exists and happens in
-the heavens both from the beginning and now, and that there is no
-other number than this number out of which the world is composed? When
-in one particular region they place opinion and opportunity, and, a
-little above or below, injustice and decision or mixture, and
-allege, as proof, that each of these is a number, and that there
-happens to be already in this place a plurality of the extended bodies
-composed of numbers, because these attributes of number attach to
-the various places,-this being so, is this number, which we must
-suppose each of these abstractions to be, the same number which is
-exhibited in the material universe, or is it another than this?
-Plato says it is different; yet even he thinks that both these
-bodies and their causes are numbers, but that the intelligible numbers
-are causes, while the others are sensible.
-
-                                   9
-
-    Let us leave the Pythagoreans for the present; for it is enough to
-have touched on them as much as we have done. But as for those who
-posit the Ideas as causes, firstly, in seeking to grasp the causes
-of the things around us, they introduced others equal in number to
-these, as if a man who wanted to count things thought he would not
-be able to do it while they were few, but tried to count them when
-he had added to their number. For the Forms are practically equal
-to-or not fewer than-the things, in trying to explain which these
-thinkers proceeded from them to the Forms. For to each thing there
-answers an entity which has the same name and exists apart from the
-substances, and so also in the case of all other groups there is a one
-over many, whether the many are in this world or are eternal.
-
-    Further, of the ways in which we prove that the Forms exist,
-none is convincing; for from some no inference necessarily follows,
-and from some arise Forms even of things of which we think there are
-no Forms. For according to the arguments from the existence of the
-sciences there will be Forms of all things of which there are sciences
-and according to the 'one over many' argument there will be Forms even
-of negations, and according to the argument that there is an object
-for thought even when the thing has perished, there will be Forms of
-perishable things; for we have an image of these. Further, of the more
-accurate arguments, some lead to Ideas of relations, of which we say
-there is no independent class, and others introduce the 'third man'.
-
-    And in general the arguments for the Forms destroy the things
-for whose existence we are more zealous than for the existence of
-the Ideas; for it follows that not the dyad but number is first,
-i.e. that the relative is prior to the absolute,-besides all the other
-points on which certain people by following out the opinions held
-about the Ideas have come into conflict with the principles of the
-theory.
-
-    Further, according to the assumption on which our belief in the
-Ideas rests, there will be Forms not only of substances but also of
-many other things (for the concept is single not only in the case of
-substances but also in the other cases, and there are sciences not
-only of substance but also of other things, and a thousand other
-such difficulties confront them). But according to the necessities
-of the case and the opinions held about the Forms, if Forms can be
-shared in there must be Ideas of substances only. For they are not
-shared in incidentally, but a thing must share in its Form as in
-something not predicated of a subject (by 'being shared in
-incidentally' I mean that e.g. if a thing shares in 'double itself',
-it shares also in 'eternal', but incidentally; for 'eternal' happens
-to be predicable of the 'double'). Therefore the Forms will be
-substance; but the same terms indicate substance in this and in the
-ideal world (or what will be the meaning of saying that there is
-something apart from the particulars-the one over many?). And if the
-Ideas and the particulars that share in them have the same form, there
-will be something common to these; for why should '2' be one and the
-same in the perishable 2's or in those which are many but eternal, and
-not the same in the '2' itself' as in the particular 2? But if they
-have not the same form, they must have only the name in common, and it
-is as if one were to call both Callias and a wooden image a 'man',
-without observing any community between them.
-
-    Above all one might discuss the question what on earth the Forms
-contribute to sensible things, either to those that are eternal or
-to those that come into being and cease to be. For they cause
-neither movement nor any change in them. But again they help in no
-wise either towards the knowledge of the other things (for they are
-not even the substance of these, else they would have been in them),
-or towards their being, if they are not in the particulars which share
-in them; though if they were, they might be thought to be causes, as
-white causes whiteness in a white object by entering into its
-composition. But this argument, which first Anaxagoras and later
-Eudoxus and certain others used, is very easily upset; for it is not
-difficult to collect many insuperable objections to such a view.
-
-    But, further, all other things cannot come from the Forms in any
-of the usual senses of 'from'. And to say that they are patterns and
-the other things share in them is to use empty words and poetical
-metaphors. For what is it that works, looking to the Ideas? And
-anything can either be, or become, like another without being copied
-from it, so that whether Socrates or not a man Socrates like might
-come to be; and evidently this might be so even if Socrates were
-eternal. And there will be several patterns of the same thing, and
-therefore several Forms; e.g. 'animal' and 'two-footed' and also
-'man himself' will be Forms of man. Again, the Forms are patterns
-not only sensible things, but of Forms themselves also; i.e. the
-genus, as genus of various species, will be so; therefore the same
-thing will be pattern and copy.
-
-    Again, it would seem impossible that the substance and that of
-which it is the substance should exist apart; how, therefore, could
-the Ideas, being the substances of things, exist apart? In the Phaedo'
-the case is stated in this way-that the Forms are causes both of being
-and of becoming; yet when the Forms exist, still the things that share
-in them do not come into being, unless there is something to originate
-movement; and many other things come into being (e.g. a house or a
-ring) of which we say there are no Forms. Clearly, therefore, even the
-other things can both be and come into being owing to such causes as
-produce the things just mentioned.
-
-    Again, if the Forms are numbers, how can they be causes? Is it
-because existing things are other numbers, e.g. one number is man,
-another is Socrates, another Callias? Why then are the one set of
-numbers causes of the other set? It will not make any difference
-even if the former are eternal and the latter are not. But if it is
-because things in this sensible world (e.g. harmony) are ratios of
-numbers, evidently the things between which they are ratios are some
-one class of things. If, then, this--the matter--is some definite
-thing, evidently the numbers themselves too will be ratios of
-something to something else. E.g. if Callias is a numerical ratio
-between fire and earth and water and air, his Idea also will be a
-number of certain other underlying things; and man himself, whether it
-is a number in a sense or not, will still be a numerical ratio of
-certain things and not a number proper, nor will it be a of number
-merely because it is a numerical ratio.
-
-    Again, from many numbers one number is produced, but how can one
-Form come from many Forms? And if the number comes not from the many
-numbers themselves but from the units in them, e.g. in 10,000, how
-is it with the units? If they are specifically alike, numerous
-absurdities will follow, and also if they are not alike (neither the
-units in one number being themselves like one another nor those in
-other numbers being all like to all); for in what will they differ, as
-they are without quality? This is not a plausible view, nor is it
-consistent with our thought on the matter.
-
-    Further, they must set up a second kind of number (with which
-arithmetic deals), and all the objects which are called 'intermediate'
-by some thinkers; and how do these exist or from what principles do
-they proceed? Or why must they be intermediate between the things in
-this sensible world and the things-themselves?...
+ANNALES GATLIOLIQUES TROISIEME ANNRE 
+
+IX 
+
+JUILLET — SEPTEMBRE 
+
+1874 
+
+
+PARIS. — B. DE SOYE ET FILS, IMPR., 5, PL. DO PANTHÉON. 
+
+
+ANNALES 
+
+
+CATHOLIQUES 
+
+
+TRANSI 
+
+
+^^ 
+
+
+REVUE RELIGIEUSE HEBDOMADAIRE 
+
+
+DE LA FRANCE ET DE L'ÉGLISE 
+
+
+PUBLIÉE AVEC l'APPROBATION ET l'ENCOURAGEMENT 
+
+DE LEURS EMINENCES Mgr LE CARDINAL - ARCHEVÊQUE DE ROUEN 
+
+ET LE CARDINAL-ARCHEVÊQUE DE CAMBRAI, 
+
+DB LL. EXC. Mgr L'aRCHEVÈQUE DE REIMS, Mgr l'aRCHEVÊQUE DE TOULOUSE, 
+
+ET Mgr L'aRCHEVÉQOE DE BOURGES, ET DE NN. SS. LES ÉVÉQUES D'aRRAS, 
+
+DE BEADVAIS, D'aNGERS, DE BLOIS, d'ÉVREUX, DU MANS, DU PUY, 
+
+DE MEAUX, DE MENDE, DE NANCY, DE NANTES, D'ORLÉANS , DE PAMIERS 
+
+DE SAINT-CLAUDE, DE SAINT-DIÉ , DE TARENTAISE , D'aUTUN, DE VANNES, 
+
+DE FRÉJUS, DE COMSTANTINE, D'HÉBRON, ETC., ETC. 
+
+
+J. CHANTREL 
+
+RÉDACTEUR EN CHEF 
+
+
+TROISIEME ANNEE — TOME IX - 
+
+
+JUILLEX — SEPXEMBRE 
+
+
+
+PARIS 
+13, RUE DE L'ABBAYE, 13. 
+
+
+N0V.2 9ig57 
+
+
+A NOS LKCTEURS. 
+
+
+Nous commençons aujourd'hui le neuvième volume 
+des Annales catholiques, et nous éprouvons le besoin de 
+faire connaître à nos lecteurs la situation aduelle de 
+l'œuvre que nous avons entreprise. 
+
+11 y a un an, les Annales catholiques paraissaient par 
+livraisons de 32 pnges; depuis un an, elles paraissent 
+par livraisons de 64 pages, sans augmentation de prix. 11 y 
+a un an, le nombre des Abonnés était loin de suffire à 
+faire les frais matériels; aujourd'hui, malgré l'augmen- 
+tation si considérable donnée aux livraisons, le nombre 
+des Abonnés nous permet de joindre, comme on dit, les 
+deux bouts ensemble. 
+
+Bien entendu, nous ne parlons ni des frais d'adminis- 
+tration, ni des frais de rédaction : jusqu'à présent, admi- 
+nistrateurs et rédacteurs consacrent gratuitement leur 
+temps à rOEuvre. 
+
+11 y a là, certes^ un grand résultat acquis : il assure 
+l'existence des Annales catholigues, et nous sommes heu- 
+reux de remercier ici les souscripteurs zélés, les écrivains 
+de la presse religieuse, et, par-dessus tout, les vénérables 
+Prélats qui nous ont aidé a atteindre ce résultat en si 
+peu de temps. Au moment où la mort si regrettable du 
+premier éditeur des Annales, M. Putois-Cretlé, fit retom- 
+ber sur nous tout le fardeau matériel de cette publication, 
+nous avons pu hésiter un moment : nous avions reconnu 
+que le nombre des pages était insuffisant pour répondre 
+à l'importance et à la multiplicité des événements reli- 
+gieux qui s'accomplissent et des questions religieuses qui 
+se débattent de nos jours; mais, voulant faire une œuvre 
+de propagande et qui fût à la portée des plus modestes 
+bourses, nous reculions devant une augmentation de 
+prix que paraissait exiger une augmentation du nombre 
+■de pages par livraisons. Persuadé, pourtant, par les té- 
+moignages qui nous venaient de toutes parts, que l'OEuvre 
+
+
+6 ANNALES CATHOLIQUES 
+
+était bonne, qu'elle avait déjà fait quelque bien et qu'elle 
+pouvait en faire davantage, nous nous sommes décidé : 
+au lieu de 32 pages, les livraison^ des Annales ont paru 
+avec 64 pages, et nous avons pu ne pas augmenter le prix 
+de l'abonnement pour la France, nous ne l'avons que 
+très-légèrement augmenté pour quelques pays étrangers, 
+après avoir reconnu la nécessité de le faire à cause des 
+fra^s de poste. 
+
+Notre confiance n'a pas été trompée, puisque l'OEuvre, 
+moyennant des sacrifices personnels dont nous n'avons 
+pas besoin de parler, a pu se suffire à elle-même et qu'elle 
+a aujourd'hui surmonté toutes les difficultés d une nou- 
+velle création. 
+
+Mais, comme nous le disions dans la dernière livraison 
+dutomeVllI, si l'existence est assurée, le but n'est pas 
+encore complètement atteint, puisque nous ne pouvons 
+pas encore dormeraux laits et aux questions tous les déve- 
+loppements qu'ils demanderaient. Nos Souscripteurs nous 
+ont, depuis un ans, |:)rocuré en moyenne trois souscrip- 
+teurs nouveaux; serait-ce trop présumer de leur zèle que 
+d'attendre de chacun d'eux encore un souscripteur? Si 
+ce résultat élait obtenu, nous pourrions sans augmen- 
+tation de prix pour ceux qui seraient nos abonnés au mo- 
+ment de cette nouvelle amélioration, ajouter quelques 
+pages aux livraisons des Annales^ et donner ainsi la pho- 
+tographie complète de la semaine religieuse. 
+
+Les Annales, nous écrit-on de tontes parts, font du 
+bien : nos lecteurs sont témoins des etforls que nous fai- 
+sons depuis trois ans |)Our les reu'lre de plus en plus di- 
+gnes du succès (ju'elles obtiennent, des encouragements 
+et des hautes approbations qui les honorent : ne pou- 
+vons-nous donc espérer que les amis de la religion, que 
+les personnes (pli s'occup<'nl de la propagation des bonnes 
+lectures, que tous ceux qui savent couibien l'aumône in- 
+tellectuelle et njoraleesl supérieure à l'aumône matérielle, 
+ne reculerontpasdevaiiti:nedépensean!mellede 12 francs, 
+une dépense mensuel le de w/i francpour procurer celte au 
+mône à tant d't\mes (jui en ont besoin, et pour enrichir, 
+par exemple, chacpie anut-e, les bibliothèques paroissiales 
+ou autres, de quatre volumes in-octavo de plus de 750 
+pages chacun, ne coulant pas, par conséquent plus de 
+
+
+A NOS LECTEURS 
+
+
+Irais francs^ei }>rësen(ant des lectures varices, la rëfutalion 
+des plus habituelles objections centre la religion, des 
+éclaircissements complets sur les questions les plus diffi- 
+ciles, l'enseignement des évèqnes, les paroles et les actes du 
+Souverain- Pontife, le récit des épreuves, des travaux, des 
+bienfaits et des triomphes de notre sainte mère l'Eglise ca- 
+tholique? 
+
+Nous savons que la propagande est parfois difficile : il 
+faut, pour réussir, des démarches, des insistances, des 
+sollicitations souvent pénibles; mais le bien ne se fait 
+pas sans quelque effort, et, quand il s'agit de sauver une 
+société qui périt, d'éclairer des âmes qui s'égarent, de 
+défendre la religion et l'Eglise, peut-ôn reculer, a-t-on le 
+droit de reculer devant quelques démarches ennuyeuses 
+et de se rebuter pour quelques insuccès? 
+
+Nous demandons ici la permission de citer une lettre 
+qu'on nous écrit, et qui nous paraît résoudre heureuse- 
+ment la question de propagande que nous venons de 
+citer. « Monsieur le Rédacteur, nous écrit un de nos 
+« zélés Souscripteurs, je vousenvoie ci-inclus un mandat 
+« de %i francs; la moitié de celle somme est pour renou- 
+« vêler mon abonnement, l'autre pour un second abonne- 
+a ment que vous voudrez bien me servir, jusqu'à ce que 
+« je vous en indique la destination. J'ai voulu me forcer 
+«ainsi à trouver le nouvel Abonné que vous demandez à 
+« chacun de vos Souscripteurs. J'ai remarqué, et je m'en 
+« accuse, que je me rebutais facilement daris les démar- 
+« ches que je fais en vue de la propagande des bonnes pu- 
+« blications. Une fois mes 12fr. versés, je sens que j'au- 
+« rai plus d'ardeur à trouver l'Abonné qui me les rem- 
+« boursera. Si je réussis, je recommencerai, et si vous 
+« trouvez que mon procédé est bon, je vous autorise bien 
+«volontiers à donner à ma lettre la publicité qui vous 
+« paraîtra convenable. » 
+
+Nous remercions bien vivement notre zélé Souscripteur. 
+S'il veut bien nous le permettre, nous ajouterons que son 
+procédé, qui nous parait excellent, peut être employé à 
+moins de frais et être encore amélioré. Quel est celui de nos 
+Abonnés qui ne pourrait pas ainsi faire l'avance d'un sim- 
+ple abonnement trimestriel, qui ne lui ferait provisoire- 
+ment débourser que 4 francs ? El, quant à ceux qui peu- 
+
+
+9 ANNALES CATHOLIODES 
+
+vent débourser 12 francs, qui les empêche de faire trois 
+abonnements trimestriels, au lieu d'un .ibonnement d'un 
+an? Pour ce dernier cas, du reste, et aûn de venir en 
+aide à celte bonne volonté, nous dirons que nous sommes 
+parfaitement disposé à recevoir 4 abonnements de trois 
+mois pour 12 francs, ou 2 abonnements de six mois 
+pour 7 frnncs, à ceux de nos Souscripteurs qui pren- 
+draient ce moyen de propager les Annales catkoliqiœs : 
+nos Souscripteurs étrangers jouiraient des mêmes avan- 
+tages d'apr>s les prix indiqués pour les divers pays. 
+
+Nous travaillons à une œuvre commune : la connais- 
+sance et la défense de la vérité et de l'Eglise; si nous 
+mettons ainsi en commun nos efforts pour soutenir et 
+pour répandre la publication des Annales catholiques^ 
+sans aucun doute l'OEuvre pourra prendre une .xtension 
+qui, tout en la rendant moins indigne de la grande cause 
+à IcKiue^lie nous lavons consacrée, lai mettra plus en état 
+de la déi'endre; or, défendre l'Eglise, c'est défendre la 
+société, c't'st défendre les plus chers intérêts du temps 
+et de l'éternité. 
+
+JN'ous plaçons de nouveau notre OEuvre sous la protec- 
+sion du Sacré-Cœur, dont le beau mois vi<'nt de tiiiir; 
+sous la protection de la sainte Vierge, la Mère de toute 
+glace, qui vient de recevoir de si splendides hommages 
+à Lille, et dont les sanctuaires de la Salette, de Lourdes et 
+de Fontniain proclament si hautement l'amour pour la 
+France; sous la protection, enfin, de l'apotre saint Paul, 
+que Pie l\ adonné [)Our patron à la [tresse, en disant ainsi 
+à tous les publicistes que leur mission est un véritable 
+apostolat. 
+
+J. Chantrel. 
+
+
+Paris, 30 juin 187 4, en la fôte de la Commémoration de 
+(le £ainl-PUuJ. 
+
+
+ANNALES CATHOLIQUES 
+
+
+CHRONIQUE ET FAITS DIVERS. 
+
+Sommaire. — Situation générale. — Rome et V Italie : Santé du 
+Pape ; désastres de Milan ; Garibaldi ; Mgr Isoard ; Mgr Nf groni. 
+Fra?ice : Les diocèses (Paris, Alger, Annecy, Autun, Beauvais, 
+Besançon, Bourges, Cahors, Le Mans, Marseille, Orléans, Péri- 
+gueux, Reims, Kouen, Saint-Denis, Tarbes, Toulouse) ; don fait 
+au cardinal Guibert par Pie IX ; Mgr Maret ; sacre de Mgr Perraud; 
+Association noyonnaise ; conciles d'Alger et du Puy ; la procession 
+de Marseille; les frères de Rouen; les pèlerins de la Réunion; 
+miracle à Lourdes ; Notre-Dame la Noire de Toulouse. — Alle- 
+magne : réunion épiscopale de Fulda ; Mgr Ledochowïfki ; le 16 
+juin à Munich; le petit séminaire de Strasbourg; bref de Pie IX 
+à Mgr Kuebel. — Belgique : réunion des étudiants de Louvain. — 
+Brésil : mort de l'archevêque de Bahia. — Espagne : Scèue 
+scandaleuse à Palencia. — Hollande : le nouvel évêque de Biéda. 
+
+— Portugal : la secte antichrétienne. — Turquie : les Armé- 
+niens. — Venezuela : persécution. 
+
+2 juillet 1874. 
+
+La situation religieuse du monde est restée telle que nous 
+i'avons décrite il y a huit jours : c'est partout la continuation 
+de la persécution et de la lutte admirable de l'épiscopat, du 
+clergé et des laïques fidèles. Maison sent que l'impiété devient 
+de plus en plus impatiente, et qu'elle n'attend, pour ainsi dire, 
+qu'un signal pour se livrer à toutes ses violences. Nous nous 
+contenterons aujourd'hui de donner les faits que nous n'avons 
+pu qu'indiquer d'une manière générale dans notre dernière li- 
+vraison. 
+
+ROME ET l'iTALIE. 
+
+La santé du Saint-Père est excellente : Pie IX résiste admirable- 
+aux fatigues des réceptions qui se multiplient depuis quinze jours à 
+l'occasion de son exaltation au souverain Pontificat, de son couron- 
+nement et de la fête de saint Pierre ; on trouvera plus loin des dé- 
+tails sur ces faits, 
+
+— Le Saint-Père recevant, il y a quelques mois, une députation 
+d'agriculteurs lombards, les exhorta très-vivement à prier beaucoup 
+afin de détourner de dessus leur province les graves châtiments 
+dont elle était menacée, à cause des insultes réitérées dont la reli- 
+gion, ses cérémonies, sa discipline étaient l'objet. Les Ubres-pen- 
+seurs de Milan se moquèrent de cet avertissement paternel du Pape, 
+
+
+iO ANNALES CATHOLIQUES 
+
+et ils saisirent la première occasion " qui se présenta pour jeter en 
+quelque sorte un déll à la divinité. Lorsque, en mai dernier, l'ar- 
+chevêque de Milan avait déjà pris toutes les dispositions pour faire 
+transporter avec une grande pompe les reliques de saint Ambroise 
+de la vieille collégiale ambrosienne dans la belle cattiédrale gothi- 
+que où repose déjà saint Charles Borromée, ces libres-penseurs s'op- 
+posèrent avec beaucoup de tapage à cette démonstration religieuse; 
+ils firent tant et si bien que le préfet de Milan se rangea de leur 
+côté, et la procession solennelle fut défendue, bien qu'elle eût été 
+autorisée par une ordonnance du conseil provincial et par un décret 
+ministériel. L'Eglise dut courber le front devant l'impiété. 
+
+Le châtiment ne s'est pas fait attendre longtemps. 
+
+Les journaux de Milan nous apportent la triste description d'un 
+ouragan épouvantable qui a éclaté le samedi, 13 juin, sur la ville de 
+Milan et les campagnes environnantes. Une grêle comme on n'en a 
+jamais vu de pareille a tout détruit : la récolte est entièrement 
+perdue ; les grêlons avaient la grosseur d'un œuf de poule. Les 
+beaux vitraux de la cathédrale ont énonmément souffert ; la galerie 
+Victor-Emmanuel et une partie de la gare ont eu leur toiture de 
+verre pilée. Tous les arbres, toutes les plantes rares des jardins et 
+des promenades publiques sont comme hachés par la main de 
+l'homme. Un grand nombre de personnes ont été blessées par les 
+grêlons. * 
+
+Les princes de Piémont, arrivés à Milan l'avant-veille, ont été té- 
+moins de cette terrible c itustrophe. 
+
+— GaribaMi est si mal, dit le Times, qu'il ne peut remuer son 
+bras, ni tenir une plume, ni môme porter ses aliments à sa bouche; 
+en un mot, il ne peut faire un mouvement. Il ne reçoit absolument 
+que ses plus intimes amis. 
+
+— Mgr [soaul, amliteur de la sainte Hôte, vient de quitter Rome 
+pour un congé de quelques semaines. Ce tribunal suprême de la 
+Ilote est fermé, hélas! Mais les jugrts demeuient, et c'est la plus 
+noble protestation que puisse opposer le Saint-Sirge aux violateurs 
+de la justice. 
+
+— Les ennemis de l'Eglise sont en ce moment stupéfaits de la ré. 
+solution que vient de prendre Mgr Negroni, ex-ministre de l'inté- 
+I ieur de Sa Sainteté, qui a renoncé à l'espérance de li pourpre et 
+quitté loutes ses digmilis [lour entrer dan^ la Coiiipa^uie de Jésus. 
+Mgr Negroni est en ce moment au noviciat des Jésuite?, à .\n- 
+gors. 
+
+
+CliRONlODE ET FAITS DIVERS , H 
+
+FRANCE. 
+
+Paris. — Durant son séjour k Rome, Mgr l'Archevêque a eu 
+l'honneur d'être reçu plusieurs fois par lo Saint-Père de la manière 
+la plus affectueuse. Monseigneur a entretenu longuement Sa Sain- 
+teté de la situation de Paris et des œuvres de charité et de religion 
+qui y fleurissent malgré tant d'influences contraires. Notre Saint- 
+Père a pris ]<i plus grand plaisir à écouter ces consolants détails, et 
+c'est avec une joie marquée qu'il a appris de la bouche de l'Arche- 
+vêque le succès de l'Œuvre de l'église du Sacré-Cœur. Près d'un 
+million et demi recueilli en moins de deux années, dans des temps 
+si difficiles et pour un but exclusivement religieux et mystique, 
+voilà qui a paru au chef de l'Eglise tout à fait digne d'admiration 
+et d'encouragement. Aussi, à ses bénédictions et à ses vœux sympa- 
+thiques, Pie IX a voulu joindre une offrande qui témoignât à tous 
+del'intérêt qu'il porte à la construction de la grande église du Sacré- 
+Cœur à Montmartre. 
+
+Cette offrande qui est destinée au trésor de la nouvelle église 
+consiste en un magniûque calice en vermeil, orné des plus riches 
+émaux. 
+
+Cette belle pièce d'orfèvrerie sort de la fabrique de M. Armand 
+Calliat, de Lyon. Sur le pied sont ciselés avec une délicatesse re- 
+marquable des sujets de l'Ancien Testament, représentant les figures 
+du sacrifice eucharistique : Abel, Hénoch, Melchisédech, Isaac ; au- 
+tour de la coupe les quatre principales scènes de la Passion. Sur la 
+face extérieure de la patène on voit retracés avec leurs emblèmes les 
+quatre évangélistes : saint Mathieu, saint Marc, saint Luc et saint 
+Jean. Sous le double rapport du prix de la matière et du fini du tra- 
+vail, on ne saurait rien imaginer de plus riche et de plus artistique 
+que ce vase. {Semaine religieuse de Paris.) 
+
+— Mgr Maret, évêque de Sura in partibm, et primicier du cha- 
+pitre de Saint-Denis, vient de quitter Rome, où il se trouvait depuis 
+plusieurs mois. On sait qu'il était venu soumettre à l'examen et à 
+l'approbation du Saint-Siège les constitutions de l'insigne chapitre. 
+L'examen a été fait par la sainte congrégation du Concile avec la 
+sagesse et la maturité que les congrégations romaines apportent à 
+tous leurs travaux, et le samedi 27 juin, son jugement a dû être 
+soumis à la sanction suprême du Pape. Le rescrit pourra être dressé 
+conformément à cette sanction. Les dernières formaUtés à remphr 
+n'exigeront probablem'ent plus que quinze ou vingt jours, et 
+Mgr Maret pourra recevoir, aussitôt à Paris, le rescrit pontifical. 
+
+
+12 ANNALES CATHOLIQUES 
+
+Alger. — La sainte congrégation du Concile vient de terminer 
+l'examen des Actes du concile provincial d'Alger. Mgr Lavigerie a 
+■ ainsi renoué la chaîne des conciles de l'antique et grande Eglise 
+d'Afrique. 
+
+Annecy. — MgrjMagnin a procédé dernièrement à la bénédiction 
+solennelle de la Croix du Salève, croix monumentale haute de 
+12 mètres, «'■levée sur l'extrémité nord du Grand-Salève, au-dessus du 
+village de Monnatier, et qui domine à la fois le bassin de Genève et le 
+bassin de l' Arve en Faucigny ; on l'aperçoit du centre même de la ville 
+de Genève, du pont du Mont-Blanc, du plateau des Tranchées, et de 
+de plusieurs rues et maisons du quartier de Saint-Gervais. Plus 
+de 15,000 personnes assistaient à cette belle cérémonie, et ont ac- 
+clamé, à la voix de l'abbé Joseph, ancien aumônier militaire, la 
+France, le. Souveruir, -Pontife, les évêques, le clergé et la catholique 
+Savoie, qui peut, dit le Couturier de Genève, « enregistrer une fois 
+de plus dans ses annales une page de triomphe et d'honneur. « 
+
+AuiLN. — Le sacre de Mgr Perraud a eu lieu très-solennelle- 
+ment daus l'église Saint-Sulpice, à Paris, le 29 juin, fête de Saint- 
+Pierre. Le prélat consécrateur était le cardinal Guibert, archevêque 
+de Paris, assisté de Mgr de Marguerye, ancien évêque d'Autun, et de 
+Mgr Bourrcl, évoque de Rodez, ancien collègue, à la Sorbonne, du 
+nouvel évêque. Mgr Meglia, nonce apostolique, assistait à la céré- 
+monie, à laquelle avait voulu être aussi présent le maréchal de 
+Mac-Mahon, qui est un ancien élève du petit séminaire d'Autun. 
+
+On remarquait aussi deux députations d'Irlande et de Pologne, 
+avec des bannières aux couleurs nationales, venues au sacre de 
+Mgr Perraud en témoignage de sympathie et do reconnaissance 
+pour l'écrivain qui a plusieurs fois défendu éloquemment la cause 
+des deux nobles pays, et pour le religieux qui s' e^t occupé avec 
+zèle des œuvres établies, K Paris, en faveur des émigrés irlandais 
+et des exilés polonais. 
+
+Beaivais. — Le IS juin a eu lieu, au petit séminaire de Noyon, 
+sous la présidence (le Mgr Gignoiix, la réunion annnclledes anciens 
+élèves de celte maison d'éducation, ([ui a fourni au clergé, à la ma- 
+gistrature, à l'armée, à la presse, à tous les rangs de la société, UQ 
+grand noinbio d'hommes (|ui. font honneur à l'éducation chrétienne 
+qu'ils ont icçui-. Un banquet fraternel a réuni, dans le réfectoire 
+inéuu5 (lu sémiiinire, tous les membres présents de l'Associ.ilion 
+noyonnaise. Ltj» l(jasls portés à Pic IX, à Mgr l'évêque de Beauvais, 
+h. tons les anciens supérieurs et maîtres do rétablissement, ont été 
+vigoureubemeul applaudis, et l'on a non moins vigoureusement 
+
+
+• CHRONIQUE ET FAITS DIVERS 43 
+
+acclamé les vers aussi ingénieux que bien tournés d'un ancien 
+élève, aujourd'hui juge de paix, qui a su évoquer les meilleurs 
+sentiment? en môme temps que les vieux souvenirs du collège. 
+Ces associations entre les anciens élèves des établissements d'ins- 
+truction se multiplient heureusegienf ; nous n'en connaissons pas 
+où les bons et vrais sentiments de camaraderie et de fraternité se 
+montrent avec une plus vérilable expansion que dans les réunions 
+des anciens élèves des maisons d'éducation religieuses. 
+
+Besançon. — Le « Vénérable » de la Loge maçonnique de Besan- 
+çon vient de mourir, après avoir riçu les secours de la religion. 
+Malgré les obsessions de ses confrères de Paris, de Strasbourg et de 
+Mulhouse, venus à son lit de mort pour le circonvenir, il a voulu 
+s'entretenir avec deux prêtres, faire abjuration, et recevoir les sa- 
+crements. Sa (in a été édifiante. 
+
+Bourges. — La sainte Congrégation du concile s'occupe de 
+l'examen du concile provincial de Bourges, tenu au Puy, que 
+Mgr de la Tour d'Auvergne Lauragais a apportera Roine. Le véné- 
+rable archevêque a reçu de Pie IX l'accueil le plus bienveillant. Il 
+a remis au Pape une somme d'environ 50,000 francs pour le Denier 
+de Saint-Pierre. A celte somme en était jointe une autre de 330 fr. 
+dont la provenance mérite d'être signalée. Quelques pieuses per- 
+sonnes de la ville de Bourges ont réuni ensemble tous les vieux 
+papiers qu'elles ont pu trouver, les ont vendus et ont ainsi recueilli 
+ladite somme de 330 francs qui a été apportée h Sa Grandeur la 
+veille de son départ pour Rome. Les donateurs avaient joint h ce 
+produit de leur piense industrie une touchante lettre que Sa Gran- 
+deur a en même temps remise au Saint-l'ère. 
+
+Cahors. — Mgr Grimardias vient d'adresser la circulaire sui- 
+vante aux fidèles de son diocèse : 
+
+« Vous n'ignorez pas les terribles effets qu'a produits l'ouragan 
+de dimanche dernier. Une grande partie de notre diocèse a été ra- 
+vagée de telle sorte que toutes les récoltes de cette année sont per- 
+dues, et que, pendant plusieurs années peut-être, le travail le plus 
+assidu restera sans récompense. 
+
+« Touché de catte situation, qu'il a constatée par lui-même, M. le 
+préfet du Lot a nommé une commission dont nous avons accepté la 
+présidence, pour essayer de trouver quelque remède à tant de souf- 
+frances. 
+
+« J'espère que la bonne volonté viendra en aide à nos efforts, et 
+qu'ils ne seront pas inutiles. Mais dès aujourd'hui j'ai hâte de faire 
+appel k la générosité des fidèles en prescrivant dans toutes les égli- 
+
+
+14 ANNALES CATHOLIQUES 
+
+ses des paroisses qui furent épargnées, une quête en faveur de ceux 
+qui ont souffert. » 
+
+Le Mans. — La santé de Mgr Fillion, qui a donné de sérieuses 
+inquiétudes depuis quelque temps, coinmence à s'améliorer; tout 
+fait espérer aujourd'hui que l'éminent prélat sera conservé à son 
+diocèse. 
+
+Marseille. — Nous avons dit un mot de la magnifique proces- 
+sion qui a eu lieu à Marseille en l'honneur du Sacré-Cœur. Dans 
+un discours plein d'éloquence, Mgr Place a principalement consi- 
+déré au point de vue social la dévotion au Sacré-Cœur de Jésus, et 
+salué l'accrcissement merveilleux de cette dévotion parmi nous. 
+« On a dit avec raison, s'est-il écrié, que la dévotion au Sacré-Cœur 
+était française dans son origine et ses développements. Elle est sur- 
+tout une dévotion marseillaise : c'est à Marseille qu'un culte pu- 
+blic, solennel, au Sacré-Cœur a été rendu, pour la première fois, au 
+milieu des événements dont nous rappelons en ce jour l'anniver- 
+saire; c'est l'objet même de cette imposante et pieuse réunion. Au- 
+jourd'hui encore, Marseille est le missionnaire et l'apôtre du Sacré- 
+Cœur. Deux ans de suite, elle a inauguré ces magnifiques pèlerina- 
+ges de Paray-le-Monial qui ont donné l'élan à toute la France. Notre 
+fête annuelle, dont lécho retentit dans le monde, est comme l^ac- 
+clamaUon des bienfaits dont le Sacré-Cœur est la source. Que ce 
+soit donc, pour Marseille et le diocèse, l'occasion des bénédictions 
+les plus abondantes. Que le Sacré-Cœur nous bénisse, ainsi que la 
+patrie tout entière, ainsi que l'Eglise et son auguste chef si cruelle- 
+ment éprouvé ! » 
+
+ORLÉANb. — La santé de Mgr Dupanloup, qui avait donné des 
+inquiétudes pendant quelques jours, s'est alfermie, et l'illustre pré* 
+lat a pu reprendre le cours de ses travaux parlementaires et épisco- 
+paiix. 
+
+PÉRiGUEux. — Mgr Dabert s'est inscrit pour 300 fr. sur la liste 
+des souscriptions ouvertes dans son diocèse pour venir en aide aux 
+victimes des derniers orages. 
+
+Reims. — On parle de Mgr Freppel, évoque d'Angers, pour le 
+siège archiépiscopal de lU'ims. 
+
+llouEN. — A la séance de la distribution des prix faite dernière- 
+meul aux soldats de la garnison de Ilouen, qui suivent les cours des 
+Frères des Ecoles chrétiennes, M. le général Lebrun, commandant 
+le 3* corps d'armée, a prononcé le discours suivant : 
+
+
+• cAronique et faits divers 15 
+
+« Messieurs les Frères, 
+
+« L'armée n'a pas perdu le souvenir des services que vous lui 
+avez rendus avec tant d'abnégation, pendant la dernière guerre, 
+alors que vous alliez, au péril de vos jours, relever sur nos champs 
+de bataille fios malheureux soldats tombés sous l'excès des fatigues 
+ou frappés par les balles ennemies. 
+
+« L'armée a la mémoire du cœur, c'est pour cela que je saisis 
+avec bonheur l'occasion de renouveler auprès de vous l'expression 
+de son admiration et de sa vive reconnaissance. 
+
+« Aujourd'hui que, pendant la paix, vous poursuivez, sous une 
+nouvelle forme, l'œuvre de patriotisme que vous avez si noblement 
+accomplie pendant la guerre, je vous adresse, au nom de l'armée, 
+ses remerciements et ses félicitations les plus chaleureuses. 
+
+« Qui travaille comme vous pour l'armée, mérite bien de la pa- 
+trie. M 
+
+De telles paroles, dans une telle bouche, vengent suffisamment 
+les Frères des injures que les radicaux leur adressent journelle- 
+ment. 
+
+Saint-Denis (Réunion). — Un certain nombre de pèlerins de l'île 
+de la Réunion (Rourbon), viennent d'arriver en France et se sont 
+rendus à Paray-le-Monial où ils ont déposé, le 2 juillet, fête de la 
+V^isitation, une magnifique bannière en velours rouge, portant celte 
+Inscription : l'île Bourbon au Sacré- Cœur de Jésus ; au milieu sont 
+brodées les armes de Mgr Delannoy, se composant de Notre-Dame 
+de la Treille, de la croix de Saint-André, double souvenir du pays 
+de l'évêque, Lille, dont Notre-Dame de la Treille est la patronne 
+vénérée, et de la paroisse de Saint-André, dont il a été longtemps 
+le curé, enfin de l'ancre d'espérance avec cette devise : hœc spes 
+hostra. Au bas delà bannière est brodée une louffe de cannes à su- 
+cre en fljurs. De chaque côté sont deux palmiers, dont les feuilles 
+vont se rejoindre au haut de la bannière, et autour desquelles s'en- 
+roulent deux banderolles, oti sont inscrits les noms des douze quar- 
+tiers de l'île Bourbon : Saint-Denis, Sainte-Marie, Sainte-Suzanne, 
+Saint-André, Saint-Benoît, Sainte-Rose, Saint-Philippe, Saint-Jo- 
+seph, Saint-Pierre, Saint-Louis, Saint-Leu et Saint-Paul; douze 
+noms de saints, car à Bourbon la France s'est montrée chrétienne. 
+
+Tarées. — Voici d'intéressants détails sur un prodige arrivé à 
+Lourdes, le 28 mai, en faveur de l'une des Dames qui font partie 
+du pèlerinage américain. — M"" Baker, de Boston (Etats-Unis), 
+était entièrement paralysée depuis plusieurs mois; c'est à peine si 
+
+
+16 ANNALES CATHOLIQUES 
+
+elle pouvait faire quelques pas à l'aide d'un appui et sur un plan 
+toul-à-fait horizontal. L'épine dorsale s'était deux fois brisée, et cette 
+fracture, jugée incurable par les médecins, lui causait des douleurs 
+continuelles. La traversée de l'Océan augmenta ses souffrances. 
+Cependant, la voilà arrivée à Lourdes, mais tellement fatiguée, qu'il 
+a fallu attendre deux jours pour oser la conduire à la Grotte et la 
+plonger lians la piscine. Enfin, dans la malinée du 28, elle voulut 
+braver la souffrance et la froideur de la température. Une voiture la 
+transporta à la Grotte, et h l'aide de bras élrangf^rs elle descendit 
+dans la piscine. Elle y. était à peine plongée que ses souffrances 
+devinrent plus aiguës et que la douleur sembla vouloir triompher 
+de sa patience. « \lafoi ! lui disait sa sœur, protestante, pour prendre 
+un bain d'eau froide, vous n'aviez pas besoin de venir si loin. » 
+Mais la confiance de la malade était toujours la même. Aussitôt elle 
+éprouve dans tout son corps un bien-être .imlicible : quelques 
+instants après, ellecourt aie Grotte pour rendregiàces à son auguste 
+bienfaitrice. Son mari, quoique protestant, se mit à verser des larmes 
+de joie, s'agenouilla à côté de sa femme et prit part aux actions de 
+grcàces qu'elle rendait à Marie. «Espérons, dit le Journal de Lourdes, 
+que ce grand miracle sera suivi d'un autre encore plus grand, celui 
+de la conversion de ces deux protestants, le mari et la sœur de la 
+miraculée. » Cette dame était encore à Lourdes le 6 juin, continuant 
+de marcher, de courir et de se bien porter. 
+
+Toulouse. — Le couronnement de .Notre-Dame la Noire a eu lieu 
+le dimanche, T juin, dans l'église de la Daurade, avec un grand éclat.- 
+Les murs de l'édifice sacré avaient disparu sous les tenturcB et sous 
+les (leurs; mais ce qui allait le plus à l'àme ( t la remuait le plus 
+profonilément, c'était une foule immense et pieusement recueillie, 
+c'étaient toutes ces voix chantant les gloires de la Vierge Mère, 
+c'i'tait cette multitude de prêtres associant leurs acclamations à celles 
+de toute une ville- représentée par l'élite de sa population, qui, elle 
+aussi, tenait à payer son tribut de reconnaissance et d'amour à 
+l'antique patronne de la France. Mgr l'Archevêque de Toulouse a 
+présidé la cérémonie et le R. P. Caussette a prononcé, en l'honneur 
+de la saii'te Vierge, un éloquent discours qui a fuit l^a plus vive 
+impression sur son auditoire. 
+
+ALLEMAGNE. 
+
+On -^crit do Fulda (iiS juin), que la Lettre pastorale rédigt^e par 
+les mcmbrep do la conférence épiscopale indique aux populations la 
+conduite à tcnip le jour où toutes les paroisses, toutes les cures, 
+
+
+i:iIRONIQUE ET FAITS DIVERS 17 
+
+tons les évôcbés, se Ironveronl vacants, par suite de l'emprisonne- 
+iiient de leurs chefs .spirituels. 
+
+En les invitant au calme, elle les invile à refuser tout pasteur 
+nommé par l'autorité civile. La publication de cette pastorale est 
+destinée à produire en Allemagne une profonde impression. 
+
+— L'extrait suivant d'une correspondance adressée d'Ostrowo à 
+la Oermania de Berlin, montrera avec quel acharnement sont persé- 
+cutés les évêques prussiens : 
+
+(( L'arehevêque avait été condamné à une nouvelle aniende de 
+1,000 Ihaler? pour infraction aux lois de Mai. Comme on avait déjà 
+tout saisi à Posen, on donna au tribunal du cercle d'Ostrowo l'ordre 
+de faire >une saisie dans la prison de l'archevêque. L'huissier M... 
+se présenta donc le 15 juin à la prison du tribunal de corcle et fut 
+conduit dans la cellule de l'archevêque après avoir montré l'ordre 
+de réquisition du tribunal de Posen. Après avoir fait connaître au 
+prélat l'ordre qu'il était chargé d'exécuter, il ouvrit la seule armoire 
+qui se trouvait dans la chambre pour chercher des objets suscep- 
+tibles d'être saisis et ne trouva naturellement rien. Il demanda 
+ensuite à qui apjiartenaient les malles. On lui répondit qu'elles ap- 
+partenaient au fisc. L'huissier partit donc sans avoir rien pu saisir; 
+mais il revint une heure après pour examiner la croix épiscopale 
+et l'anneau qu'il avait vue sur la personne de Mgr Ledochowski. 
+Seulement, il n'était pas chargé par l'autorité judiciaire d'entrer 
+une seconde fois dans la prison de l'archevêque ; on refusa de le 
+recevoir. » 
+
+— Le 28* anniversaire de l'exaltation de Pie IX a été magnifi- 
+quement célébré à .Munich, d'abord à la cathédrale, ensuite, le soir, 
+dans une nombreuse réunion de catholiques, qui s'est tenue dans 
+la halle de la grande brasserie royale située In'der Au. M. Schut- 
+tinger, député au Reichstag et à la chambre bavaroise, monta d'a- 
+bord à la tribune au milieu des applaudissements universels. Après 
+avoir traité de la situation de l'Eglise catholique partout persécutée, 
+et surtout en Allemagne, il dit : « Nous catholiques, nous nous 
+glorifions de ce vieillard d'outre-monts, de ce Pape saint et véné- 
+rable qui souffre persécution pour la vérité, le droit et la liberté ; 
+on nous appelle ultramontains ; mais c'est là r.n titre d'honneur, 
+car nous sommes en réalité ultramontains attachés de cœur, de 
+volonté et d'esprit au Chef suprême de l'Eglise, le seul et véritable 
+représentant de Dieu sur la terre. Combien 'il est admirable de voir 
+ce Pontife, abandonné par tous les grands de la terre, malgré les 
+tempêtes qui assaillent sa barque, malgré sa faiblesse apparente, 
+
+
+18 ANNALES CATHOLIQUES 
+
+rester ferme, vigoureux et fort de la force de Dieu, ne s'appuyaut 
+que sur les principes éternels pour déjouer tous les projets de 
+l'enfer ! La lutte que l'empire a engagée avec lui ne peut l'ébranler; 
+les efforts du libéralisme se briseront au roc sur lequel Pie IX se 
+tient inébranlable, car les portes de l'enfer ne prévaudront jamais 
+contre l'Eglise et la chaire de Pierre. » 
+
+Quand M. Schultinger eut cessé de parler, on cria des vivats en 
+l'honneur du Pontife-Roi. Après le discours, la musique militaire 
+exécuta une brillante symphonie de Beethoven, et la société cho- 
+rale la Concordia chanta un hymne à Pie IX. 
+
+A peine les accords de cet hymne magnitique eurent-ils cessé 
+de retentir, que le député "Westermayer monta à la tribun^. lî 
+commença par établir un parallèle entre les principes révolution- 
+tionnaires de 1789 et les principes de l'Etat moderne. Il induisit 
+de la situation que ces principes font à l'Eglise catholique, la né- 
+cessité pour tous les fidèles de s'unir en rangs serrés pour défendre 
+les principes éternels du christianisme contre tous les ennemis de 
+la foi et de la conscience. M. "Westermayer développa cette thèse, 
+indiqua les devoirs qu'il y avait à remplir et la position qu'il y 
+avait à prendre pour ne se laisser ni séduire ni' vaincre. «Gloire 
+à Dieu, fidélité à la sainte Eglise, dévoùment sans bornes au Sou- 
+verain Pontife, attachement inviolable à l'épiscopat, telles sont les 
+vertus qui doivent briller aujourd'hui dans tout catholique, et avec 
+ces vertus, quelque grands et puissants que soient les ennemis de 
+noire foi, nous les vaincrons. Vive Pie IX ! vive le Pontife-Uoi ! » 
+Près de dix mille poitrines répétèrent cette acclamation, et l'im- 
+mense auditoire se sépara au son du Te Deum allemand, exécuté 
+par la musique militaire. 
+
+— Le Courrier du Bas-Rhin annonce que « par ordre supérieur, 
+les Frères instituteurs et les Sœurs institutrices appartenant à des 
+ordres religieux étrangers et fonctionnant en Alsace-Lorraine, de- 
+' vront cesser leurs fonctions h i)artir du I" octobre prochain. » 
+
+Le lundi 2-1 juin, arrivait de Berlin c\ M. l'abbé Miiry, supérieur 
+du petit séminaire de Strasbourg, l'avis ot'liciel que son recours au 
+chancelier de l'empire, — recours interjeté après le décret de fer- 
+meture de l'établissement, signé du président supérieur d' Alsace- 
+Lorraine, — était rejeté comme non fondé. 
+
+Le lendemain soir, le directeur de polici', M. Mannss, venait de- 
+mander au supérieur s'il voulait fermer lui-même rétiii)lissement 
+ou si la police devait le faire. M. Mury répondit qu'assurémeiii ii 
+ne fermeiait pas lui-môme sa propre' niiiison : il d^-mandait jus 
+
+
+CDRONIQUE ET FAITS DIVERS VJ 
+
+qu'au lendemain pour prendre les instructions de son évoque. 
+
+Le matin du 2û juin, à neuf heures, M. Mury est allé, au nom 
+do l'évoque, prier le directeur de police de surseoir h l'exécution. 
+Réponse lui fut faite qu'à moins de contre-ordre du président supé- 
+rieur, le petit séminaire serait fermé dans la journée. 
+
+De là, le supérieur, toujours au nom de l'évoque, se présenta 
+chez M. de Mœller, président supérieur d'Alsace-Lorraine, et lui 
+annonça la visite du prélat, ajoutant que Mgr Raess préparait, peur 
+l'envoyer à Berlin, un nouveau mémoire de protestation. « Toutes 
+les instances sont épuisées, répondit M. de Mœller; toute nouvelle 
+démarche est inutile. » 
+
+Le soir donc, à quatre heures, un inspecteur et un commissaire 
+de police, assistés de quatre agents, arrivent au petit séminaire. Ils 
+demandent le supérieur. On était réuni à la chapelle. Le supérieur 
+sort. Ces messieurs lui annoncent qu'ils viennent pour fermer l'é- 
+tablissement, et lui demandent quelle heure lui convient le mieux. 
+« L'heure m'est indift'érente, » répond M. Mury. 
+
+II retourne à la chapelle : « Cher.s élèves, dit-il, vous venez d'as- 
+sister au dernier office du petit séminaire de Strasbourg. En ce 
+moment, les agents de police envahissent la maison et viennent 
+fermer les salles de classes. Conservez en face de la persécution le 
+calme et la dignité du silence. Une dernière fois recommandez la 
+cause du petit séminaire à Dieu et à la justice. » 
+
+Après ces quelques paroles, accueillies par une douloureuse émo- 
+tion, le supérieur va rejoindre les agents, qui lui demandent les 
+clefs et le prient de lui indiquer les salles de la classe. 
+
+Les portes de ces salles sont fermées à clef par l'inspecteur de 
+police. Puis, lecture est faite d'un article de loi punissant de cent 
+Ihalers d'amende tout essai de faire classe. 
+
+Le supérieur fait consigner au procès-verballa protestation qu'il 
+élève au nom de. son évêque, en son propre nom, au nom des pro- 
+fesseurSj^es élèves, de leurs parents et de tous les catholiques 
+d'Alsace-Lorraine. Puis, tout est terminé ! ! ! 
+
+— 11 paraît qu'une entente est à la veille de s'établir entre la cour 
+de Rome et le gouvernement badois, relativement à l'archevêché 
+de Fribourg. Le gouvernement a laissé 5 noms sur la list3 des 
+14 candidats qui lui ont été présentés par le chapitre. Ce sont 
+NN. SS. Haneberg et Héfélé, évêques de Spire et de Rottenbourg ; 
+les trois chanoines Behrle, Dieringer et Alzog. Ce derni'^r surtout 
+est connu pour de savants travaux théologique?. 
+
+A cette occasion, nous devons faire connaître le bref adressé par 
+
+
+20 ANSALES CATHOLIQUES 
+
+le Pape à Mgr Kaebel, évêque administpateur de l'archidiocèse da 
+Fribourg en Brisgau (grand-duché de Bade) : 
+
+Vénérable Fr^re, salut et bénédiction apostolique. 
+
+De nos jo .rs, vénérable frère, chaque fois qu'on apprend qu'une 
+mesure de persécution a été proposée contre l'Eglise, on ne peut 
+plus guère douter que bientôt elle ne passe en loi. 
+
+C'est pour C3tte raison que Nous ne Nous étonnons aucunement 
+de ce qu'on ait ajouté au code du grand-duché de Bade, la loi que 
+vous Nous avez signalée d'avance à la tin de l'année dernière, 
+comme devant entraver les fonctions épiscopales et sacerdotales, 
+fouler aux pieds les droits sacrés, supprimer les séminaires et dé- 
+truire toute la constitution de l'Eglise. 
+
+Mais taudis que les puissances des ténèbres s'acharnent de toutes 
+parts contre le roc que le Christ a établi, et unissent leurs efforts 
+pour le saper, — ce roc ne s'en montre que plus ferme dans son 
+immobilité et soutient, sans être ébranlé, le choc des ennemis, 
+dont la main ne semble frapper que des coups d'enfant. Car partout 
+les évoques, quoique exposés aux amendes, aux spoliations, aux 
+souffrances, à la prison, k l'exil, et, avec eux, le clergé en butte aux 
+mêmes maux, deviennent, devant les droits sacrés, une colonne de 
+fer et un mur d'airain. Non-seulement ils ne tremblent pas devant 
+les puissants ; mais le front haut, ils font connaître et condamnent 
+les lois perverses, et ils s'efforcent, autant qu'il est en leur pouvoir, 
+d'empôcher qu'elles ne soient proposées. Si malgré cela elles sont 
+votées, ils déclarent sans crainte qu'ils ne peuvent pas leur obéir, 
+et ils élèvent la voix pour engager leur troupeau à obéir à Dieu 
+plutôt qu'aux hommes. 
+
+Car, en effet, on ne refuse pas la soumission due au pouvoir 
+civil, lorsqu'on ne veut pas obéir à de pareilles ordonnances, 
+puisque celles-ci ne sont aucunement des lois, soit piirce qu'elles 
+sont portées par des hommes qui n'ont auiuu pouvoir sur l'Eglise, 
+soit parce que quiconque contredit la doctrine do l'Eglise se met en 
+opposition avec la loi de Dieu, à laquelle la Volonté de l'homme ne 
+peut rien chinger. 
+
+Nous vous félicitons donc, vénérable Frère, Nius félicitons votre 
+clergé. Ni vous ni lui, vous ne le cédez à aucun de vos frères : prêts 
+à subir loules les épreuves [)our Dieu, vous donnez à l'Eglise, par 
+cette très-noble constance, un triomphe plus beau qu'aucune vic- 
+toire matérielle. 
+Résistez donc, eu demeuiunt fermes dans lu foi, et combattez le 
+
+
+à 
+
+
+CHRONIQUE ET FAITS DIVERS 21 
+
+serment antique. Cnr toutes vos souffrances seront convertios en 
+couronii(\s, puisque Dieu a appelé bieul.eiireux ceux qui souffrent 
+perbt'cution pour la justice. 
+
+Pour Nous, Nous vous souhaitons, dans cette lutte difficile, à 
+vous, à votre clergé ei à vo3 fidèles, les secours eflicaces et abon- 
+dants de la grâce céleste, — et en attendant, Nous vous accordons 
+avec une grande ;iffection la bénédiction apostolique, comme pré- 
+sage de la laveur divine et gage de Notre bienveillance toute spé- 
+ciale. 
+
+Donné à Rome, près Saint-Pierre, le 20' jour d'avril 1874, de 
+Notre Pontiûcat l'année vingt-huitième. 
+
+PIE IX, PAPE. 
+
+BELGIQUE. 
+
+Dans une réunion ^es Anciens étudiants de l'Université catholique 
+de Louvain, qui a eu lieu le 21 juin, Mgr Cartuyvels, vice-recteur 
+de l'Université, a fait entendre ces paroles, accueillies par d'una- 
+nimes applaudissements : 
+
+« Naguère, l'Eglise universelle célébrait le centenaire de saint 
+Thomas d'Aquin, de saint Thomas, cette personnification du génie 
+grandi à des proportions surhumaines au service de la foi et de la 
+verlu. A l'époque où saint Thomas illustrait les académies, la chré- 
+tienté se couvrait d'une floraison d'écoles aussi splendidç que celle 
+des cathédrales qui s'élevaieut alors d'un bout à l'autre de l'Europe. 
+De Naples à Paris, en passant par Bologne et Cologne, le docteur 
+angélique rencontrait partout des milliers de disciples, réunis autour 
+des chaires éiigées par les Papes, et du haut desquelles la science 
+et la foi se prêtant un mutuel appui préparaient au monde la ma- 
+gnifique expansion de la civilisation chélienne du treizième siècle. 
+Presque lotîtes ces grandes écoles sont tombées sous les atteintes 
+de r^.érésie ou sous les coups du marteau révolutionnaire; mais 
+voici que le centenaire de saint Thomas d'Aquin éclaire partout des 
+germes nouveaux, soulève la poussière des ruines; et au milieu de 
+l'ébranlement général qui fait crouler autour de nous ce qui reste 
+des institutions des anciens âges, il nous est permis de saluer dans 
+la résurrection des universités catholiques les centres providentiels 
+de l'avenir. 
+
+« En ce moment le monde chrétien tout entier s'émeut d'un triom- 
+phant anniversaire : le couronnement de Pie IX! (Acclamations.) 
+Messieurs, toute parole est ici superflue, et nulle déraonstation ne 
+rendra jamais l'émotion que ce nom vénéré fait vibrer dans nos 
+
+
+22 ANNALES CATHOLIQUES , 
+
+âmes! (Acclamations et vivats.) Autour de ce front vénérable où 
+l'onction sacrée a fixé la tiare, l'histoire à son tour a posé trois 
+rayonnantes couronnes : la couronne de la vérité et de la doctrine, 
+des dogmes, par d'immortelle^.- encycliques, par les canons du con- 
+cile, par des paroles de feu tombant à toute heure de cette bouche 
+de prophète: la couronne austère des tribulations supportées pour 
+la justice avec un cœur magnanime qui soutient le courage de tous 
+les persécutés de l'univers. La couronne, enfin, des grandes œuvres 
+qui ont dilaté l'apostolat jusqu'aux confins de la terre, rétabli la 
+hiérarchie, resserré l'unité, fait briller l'héroïsme de la foi, et qui 
+préparent la restauration chrétienne des temps modernes. Messieurs, 
+qu'il me soit permis d'unir dans mon cœur votre association aux 
+gloires du Pontificat de Fie IX ! Puisse-t-elle à jamais s'inspirer de 
+notre esprit! Puisse-t-elle mériter d'être un joyau de sa couronne! 
+Puisse-t-elle grandir chaque jour en nombre, en puissance, en 
+œuvres pour la prospérité de VAltna Mater, la gloire de l'Eglise et 
+Ib salut de notre pays ! h 
+
+BRÉSIL. 
+
+Un câble transocéanique vient d'être placé entre le Portugal et le 
+Brésil. L'une des premières dépêches qu'il a transmises, le 25 juin, 
+nous a apport ■; la douloureuse nouvelle de la mort de Mgr de Sil- 
+veira, comte de San Salvador, archevêque de Bahia et primat du 
+Brésil, dont nous avons dernièrement fait connaître la courageuse 
+protestation contre les actes de persécution qui affligent cet empire. 
+
+ESPAGNE. 
+
+Une scène des plus scandaleuses s'est passée il y a quelques 
+semaines, à Palencia, petite ville de la province de Léon. Les caril- 
+loni'eurs de Palencia ayant reçu l'ordre de sonner les cloches pour 
+se conformer au rituel, quelques jeunes gens se sont imaginé que 
+le clergé voulait se livrer à une démonstration carliste, et aussitôt 
+toutes les églises ont été envahies par une foule en fureur. Les 
+portes de la cathédrale ont été d'abord renversées. Puis les jeunes 
+gens de la ville, ontcnnant des chansons obscènes, ont profané le 
+sanctuaire et sont tour h tour montés en chaire pour faille entendre 
+les cris de l'impiété. Dans l'église de Notre-Dame, le scandale a 
+revêtu encore un caractère plus odieux. Lorsque, dans son délire, la 
+foule a inondé la nef de ses fiots tumulluoux, il y aviiil adoration 
+perpétuelle; l'ostensoir et l'hostie consacrée resplendissaient au 
+milieu des lampes et des cierges allumés. Les profanateurs se sont 
+
+
+CHRONIQUE ET FAITS DIVERS 23 
+
+rués sur 1(? rnaîlre-autel, ont brisé le Saint-Sacrement, ont mis en 
+pièces la sainte hostie; ensuite, tournant leur fureur sur le sacris- 
+tain, ils l'ont obligé à leur apporter tous les missels, dont les 
+fenillels ont été arrachés par eux, ainsi que les surplis dont ils ont 
+fait un fou de joie. Enlin, pour couronner leur œuvre satanique, ils 
+ont descellé le tabernacle, réduit en mille morceaux la croix et 
+l'autel, lacéré des tableaux de grand*^ valeur et ont brûlé les confes- 
+sionnaux. Quand l'autorité s'est présentée avec la guardia cioil 
+pour mettre fin à ce désordre abominable, il n'étuit plus temps de 
+rien empêcher, le sacrilège était consommé. L'évèqu*' du diocèse a 
+fait fermer l'église Notre-Dame jusqu'à ce qu'elle pût ôtre puri- 
+fiée solennellement de ces indignes profanations. 
+
+HOLLANDE. 
+
+Mgr Van Beck, qui vient d'être appelé au siège épiscopal de 
+Bréda, en remplacement de Mgr Gheuk, décédé, avait occupé jus- 
+que-là l(-s fonctions de vicaire général de l'évêché de Harlem ; il 
+était en même temps doyen à Harlem et prévô!. du chapitre de la 
+cathédrale ; il est très-regretté des ouailles qu'il va quitter. C'est 
+un homme de profondes connaissances, d'un caractère élevé, pieux, 
+affable, en un mot le bon pasteur auquel- se rallie le troupeau 
+confié à sa garde. 
+
+L'évêché de Bréda est le moins important de tout le pays; il 
+compte 8 doyennés, 83 paroisses et 139,000 fidèles. Li,e jour de la 
+consécration et de l'inslallatioa du nouveau prélat n'est pas encore 
+fixé. 
+
+Mgr Claessen, nommé évêque de Tripoli, administrateur aposto- 
+lique de Batavia, en remplacement de Mgr Vranken, démission- 
+naire, doit être consacré à Sitlard (duché de Limbourg), son lieu 
+natal, oii demeure encore sa vieille mère, et oii fat également con- 
+sacré son prédécesseur, Mgr Vranken, en 1847. Ce dernier occu- 
+pait alors les fonctions de curé-doyen dans la petite ville limbour- 
+geoise, de sorte que cet endroit semble choisi pour donner aux 
+colonies hollandaises ses chefs ecclésiastiques. 
+
+Ce fut Mgr Paredis, évêque de Ruremonde, qui consacra Mgr 
+Vranken, il y a vingt-sept ans, et ce sera sans encore la même noble 
+et saint vieillard qui consacrera son successeur. 
+
+Quant à Mgr Vranken, après s'être voué pendant un quart de 
+siècle à propager la foi aux Indes, il est revenu, forcé de prendre 
+cette décision pour cause de santé. Il faut vivement regretter que 
+Mgr Vranken ait dû quitter le ministère évangélique, car c'est un 
